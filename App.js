@@ -20,6 +20,7 @@ export default function App() {
   //   },
   // };
   // Handle user state changes
+
   function onAuthStateChanged(user) {
     setUser(user);
     if (initializing) {

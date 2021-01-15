@@ -11,24 +11,59 @@ import {
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 //import auth from 'firebase/auth';
-
+function capitalize(s) {
+  if (typeof s !== 'string') {
+    return '';
+  }
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
 async function CreateUser(email, password, first, last) {
+  first = capitalize(first);
+  last = capitalize(last);
   auth()
-    .createUserWithEmailAndPassword(email, password)
-    .then((response) => {
-      const uid = response.user.uid;
-      const data = {
-        id: uid,
-        email,
-        first,
-        last,
-      };
-      const usersRef = firestore().collection('users');
-      usersRef
-        .doc(uid)
-        .set(data)
-        .then(() => {
-          console.log('logged in.');
+    .setPersistence('local')
+    .then(() => {
+      return auth()
+        .createUserWithEmailAndPassword(email, password)
+        .then((response) => {
+          const uid = response.user.uid;
+          const data = {
+            bday: null,
+            bio: '',
+            gender: 0,
+            numEvents: 0,
+            numFriends: 0,
+            first: first,
+            last: last,
+            userSince: new Date().toDateString(),
+          };
+          const usersRef = firestore().collection('users');
+          usersRef
+            .doc(uid)
+            .set(data)
+            .then(() => {
+              auth()
+                .currentUser.updateProfile({
+                  displayName: first + ' ' + last,
+                })
+                .then(() => {
+                  console.log('display name set successfully');
+                })
+                .catch((error) => {
+                  console.log('error setting display name: ' + error);
+                });
+              // auth()
+              //   .currentUser.sendEmailVerification()
+              //   .then(() => {
+              //     console.log('email sent');
+              //   })
+              //   .catch((error) => {
+              //     console.log(
+              //       'error while sending verification email: ' + error,
+              //     );
+              //   });
+              console.log('logged in.');
+            });
         });
     })
     .catch((error) => {

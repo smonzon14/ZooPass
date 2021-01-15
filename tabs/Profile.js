@@ -17,9 +17,11 @@ import Genders from '../enums/Genders.js';
 import DatePicker from 'react-native-date-picker';
 import DropDownPicker from 'react-native-dropdown-picker';
 import CustomPromptModal from '../pageComponents/CustomPromptModal.js';
+import Fire, {FirebaseHelper} from '../FirebaseHelper.js';
 export default class Profile extends Component {
   constructor(props) {
     super(props);
+    this.userInfo = this.getUserInfo();
     this.state = {
       bio: '',
       gender: 0,
@@ -28,9 +30,27 @@ export default class Profile extends Component {
       editBDay: false,
     };
   }
-  getUserInfo() {}
+  getUserInfo() {
+    return Fire.getCurrentUserInfo().then((res) => {
+      console.log(res);
+      this.setState({
+        bio: res.bio,
+        gender: res.gender,
+        birthday: res.birthday === null ? new Date() : new Date(res.birthday),
+      });
+      return res;
+    });
+  }
   saveUserInfo() {
+    return new FirebaseHelper()
+      .updateUserInfo(this.state.bio, this.state.gender, this.state.birthday)
+      .then((res) => {
+        return res;
+      });
     //TODO: implement save user data
+  }
+  componentWillUnmount() {
+    console.log('unmount');
   }
   render() {
     return (
@@ -38,6 +58,7 @@ export default class Profile extends Component {
         <TextInput
           style={DefaultStyles.textInput}
           placeholder="bio"
+          defaultValue={this.state.bio}
           onChangeText={(text) => this.setState({bio: text})}
         />
         <TouchableOpacity
@@ -61,23 +82,23 @@ export default class Profile extends Component {
         </TouchableOpacity>
         <CustomPromptModal
           title="Gender"
-          closeText="Save"
+          closeText="Close"
           visible={this.state.editGender}
           onClose={() => {
             this.setState({editGender: false});
           }}>
           <OptionList
             values={Object.keys(Genders)}
-            selected={1}
+            selected={this.state.gender}
             callback={(item, i) => {
               console.log(item);
-              this.setState({gender: item});
+              this.setState({gender: i});
             }}
           />
         </CustomPromptModal>
         <CustomPromptModal
           title="Birthday"
-          closeText="Save"
+          closeText="Close"
           visible={this.state.editBDay}
           onClose={() => {
             this.setState({editBDay: false});
@@ -118,26 +139,3 @@ export default class Profile extends Component {
 //     this.setState({gender: item.key});
 //   }}
 // />
-const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-    backgroundColor: 'black',
-  },
-  modalView: {
-    width: 200,
-    height: 200,
-    backgroundColor: '#404040',
-    borderRadius: 10,
-    padding: 10,
-  },
-  circle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: 'gray',
-    alignSelf: 'center',
-  },
-});

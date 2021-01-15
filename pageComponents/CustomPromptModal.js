@@ -17,9 +17,9 @@ export default (props) => {
   // const [visible, setVisible] = useState(false);
   // props.open(setVisible);
   return (
-    <Modal animationType="slide" transparent={true} visible={props.visible}>
+    <Modal animationType="fade" transparent={true} visible={props.visible}>
       <Pressable
-        style={{...styles.centeredView, backgroundColor: 'transparent'}}
+        style={{...styles.centeredView, backgroundColor: '#000000b0'}}
         onPress={props.onClose}>
         <View style={styles.modalView}>
           <View>
@@ -72,8 +72,9 @@ const styles = StyleSheet.create({
   },
   modalView: {
     minWidth: 200,
+    maxWidth: 400,
     backgroundColor: '#404040',
-    borderRadius: 10,
+    borderRadius: 20,
     padding: 15,
   },
 });

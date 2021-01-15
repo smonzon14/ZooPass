@@ -15,6 +15,7 @@ export default (props) => {
       {props.values.map((item, i) => {
         return (
           <TouchableOpacity
+            key={i}
             style={{flexDirection: 'row', marginTop: 20}}
             onPress={() => {
               props.callback(item, i);
