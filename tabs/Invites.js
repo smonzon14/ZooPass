@@ -1,5 +1,3 @@
-/* @flow */
-
 import React, {Component} from 'react';
 import {
   View,
@@ -8,8 +6,10 @@ import {
   SafeAreaView,
   FlatList,
   RefreshControl,
+  TouchableOpacity,
 } from 'react-native';
 import DefaultStyles from '../styles/Default.js';
+import AddFriends from '../tabs/AddFriends.js';
 let InvitesList = [
   {
     title: 'hello world',
@@ -32,10 +32,17 @@ const renderInvite = ({item}) => (
 
 export default class Invites extends Component {
   state = {refreshing: false};
+  constructor(props) {
+    super(props);
+    this.modalRef = React.createRef();
+  }
   onRefresh() {
     this.setState({refreshing: true});
     this.setState({refreshing: false});
   }
+  openAddFriendModal = () => {
+    this.modalRef.current?.open();
+  };
   // retrieveInvites() {
   //   this.setState({fetching: false});
   // }
@@ -43,6 +50,9 @@ export default class Invites extends Component {
     return (
       <View style={DefaultStyles.container}>
         <SafeAreaView>
+          <TouchableOpacity onPress={this.openAddFriendModal}>
+            <Text style={DefaultStyles.regularText}>Add Friends</Text>
+          </TouchableOpacity>
           <FlatList
             data={[{title: 'hello world', id: '123456'}]}
             renderItem={renderInvite}
@@ -55,6 +65,8 @@ export default class Invites extends Component {
             }
           />
         </SafeAreaView>
+
+        <AddFriends r={this.modalRef} />
       </View>
     );
   }

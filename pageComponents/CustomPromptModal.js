@@ -18,9 +18,16 @@ export default (props) => {
   // props.open(setVisible);
   return (
     <Modal animationType="fade" transparent={true} visible={props.visible}>
-      <Pressable
-        style={{...styles.centeredView, backgroundColor: '#000000b0'}}
-        onPress={props.onClose}>
+      <View style={{...styles.centeredView, backgroundColor: 'transparent'}}>
+        <Pressable
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#000000b0',
+          }}
+          onPress={props.onClose}
+        />
         <View style={styles.modalView}>
           <View>
             <Text
@@ -57,7 +64,7 @@ export default (props) => {
             {props.children}
           </View>
         </View>
-      </Pressable>
+      </View>
     </Modal>
   );
 };
@@ -71,9 +78,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
   },
   modalView: {
+    zIndex: 5,
     minWidth: 200,
     maxWidth: 400,
-    backgroundColor: '#404040',
+    backgroundColor: '#303030',
     borderRadius: 20,
     padding: 15,
   },

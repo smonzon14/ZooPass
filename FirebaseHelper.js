@@ -1,5 +1,7 @@
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
+import storage from '@react-native-firebase/storage';
+
 const usersCollection = firestore().collection('users');
 const exploreCollection = firestore().collection('explore');
 
@@ -18,6 +20,29 @@ class FirebaseHelper {
   constructor() {
     this.user = authUser();
   }
+  //Create
+  async shareEvent(event, image = null) {
+    return await usersCollection
+      .doc(this.user.uid)
+      .collection('events')
+      .add(event)
+      .then(async (e) => {
+        console.log(e);
+        if (image) {
+          const reference = storage().ref(
+            'events/' + this.user.uid + '/' + e.id,
+          );
+          return await reference.putFile(image).then(async () => {
+            return usersCollection
+              .doc(this.user.uid)
+              .collection('events')
+              .doc(e.id)
+              .update({imageReference: await reference.getDownloadURL()});
+          });
+        }
+      });
+  }
+
   //Read
   async getCurrentUserInfo() {
     return await {
@@ -33,7 +58,14 @@ class FirebaseHelper {
       return doc.data();
     }
   }
-
+  static async getUsersMatching(text) {
+    return await usersCollection
+      .where('first', '>=', text)
+      .where('first', '<=', text + '\uf8ff')
+      .orderBy('first')
+      .limit(10)
+      .get();
+  }
   //Update
   updateEmail(email) {
     return this.user

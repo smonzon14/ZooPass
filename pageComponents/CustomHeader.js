@@ -1,26 +1,22 @@
 /* @flow */
 
 import React, {Component} from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet, SafeAreaView} from 'react-native';
 //import LinearGradient from 'react-native-linear-gradient';
-
+import DefaultStyles from '../styles/Default.js';
 export default class CustomHeader extends Component {
   render() {
     return (
-      <View
+      <SafeAreaView
         statusBarProps={{barStyle: 'light-content'}}
-        style={{width: '100%', height: 200, backgroundColor: 'black', top: 0}}>
-        <Text
-          style={{
-            fontSize: 30,
-            fontWeight: 'bold',
-            top: 150,
-            left: 15,
-            color: 'white',
-          }}>
-          {this.props.title}
-        </Text>
-      </View>
+        style={{
+          width: '100%',
+          backgroundColor: 'black',
+          marginBottom: 15,
+          marginTop: 75,
+        }}>
+        <Text style={DefaultStyles.titleText}>{this.props.title}</Text>
+      </SafeAreaView>
     );
     // return (
     //   <Header

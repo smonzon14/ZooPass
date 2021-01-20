@@ -1,20 +1,11 @@
-import React, {Component, useRef} from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  StatusBar,
-  TouchableOpacity,
-} from 'react-native';
+import React, {Component} from 'react';
+import {StyleSheet, Text, View, StatusBar, SafeAreaView} from 'react-native';
 import Tabs from 'react-native-tabs';
 import Invites from './Invites.js';
 import Calendar from './Calendar.js';
 import Create from './Create.js';
 import Explore from './Explore.js';
 import Profile from './Profile.js';
-//import Sheet from 'react-modal-sheet';
-import {Modalize} from 'react-native-modalize';
-import DefaultStyles from '../styles/Default.js';
 import CustomHeader from '../pageComponents/CustomHeader.js';
 export default class MasterTabView extends Component {
   state = {page: 'Invites', createShowing: false};
@@ -25,7 +16,7 @@ export default class MasterTabView extends Component {
     Explore: <Explore />,
     Profile: <Profile />,
   };
-  onOpen = () => {
+  openCreateModal = () => {
     this.modalRef.current?.open();
   };
   getTabComponent() {
@@ -33,9 +24,9 @@ export default class MasterTabView extends Component {
   }
   render() {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <StatusBar barStyle="light-content" />
-        <Modal r={this.modalRef} />
+        <Create r={this.modalRef} />
         <CustomHeader title={this.state.page} />
         <View style={styles.selectedPage}>{this.getTabComponent()}</View>
 
@@ -66,44 +57,10 @@ export default class MasterTabView extends Component {
             Profile
           </Text>
         </Tabs>
-      </View>
+      </SafeAreaView>
     );
   }
 }
-export const Modal = (props) => {
-  const onOpen = () => {
-    props.r.current?.open();
-  };
-  const onClose = () => {
-    props.r.current?.close();
-  };
-  return (
-    <>
-      <Modalize ref={props.r}>
-        <TouchableOpacity
-          onPress={onClose}
-          style={{height: 100, width: 100, backgroundColor: 'blue'}}>
-          <Text>Close the modal</Text>
-        </TouchableOpacity>
-        <Create />
-      </Modalize>
-    </>
-  );
-};
-// <button onClick={() => this.setState({createShowing: true})}>
-//   Open sheet
-// </button>
-//
-// <Sheet
-//   isOpen={this.state.createShowing}
-//   onClose={() => this.setState({createShowing: false})}>
-//   <Sheet.Container>
-//     <Sheet.Header />
-//     <Sheet.Content>{/* Your sheet content goes here */}</Sheet.Content>
-//   </Sheet.Container>
-//
-//   <Sheet.Backdrop />
-// </Sheet>
 const styles = StyleSheet.create({
   container: {
     flex: 1,

@@ -2,9 +2,25 @@ import React, {useState} from 'react';
 import {View, StyleSheet} from 'react-native';
 import {Calendar} from 'react-native-calendars';
 
+function formatDate(date) {
+  var d = new Date(date),
+    month = '' + (d.getMonth() + 1),
+    day = '' + d.getDate(),
+    year = d.getFullYear();
+
+  if (month.length < 2) {
+    month = '0' + month;
+  }
+  if (day.length < 2) {
+    day = '0' + day;
+  }
+
+  return [year, month, day].join('-');
+}
+
 export default ({}) => {
   let today = new Date();
-  const [day, setDay] = useState(today.getDate());
+  const [day, setDay] = useState(formatDate(new Date()));
   return (
     <View style={styles.calendarContainer}>
       <Calendar
@@ -15,14 +31,13 @@ export default ({}) => {
         style={styles.calendar}
         enableSwipeMonths={true}
         theme={{
-          backgroundColor: 'black',
-          calendarBackground: 'black',
+          calendarBackground: 'transparent',
           selectedDayBackgroundColor: 'red',
           dayTextColor: 'white',
           monthTextColor: 'white',
           arrowColor: 'red',
           todayTextColor: 'red',
-          textDisabledColor: '#444444',
+          textDisabledColor: '#777777',
         }}
         markedDates={{
           [day]: {
@@ -38,18 +53,16 @@ export default ({}) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    color: 'white',
-    backgroundColor: 'black',
-    alignItems: 'center',
-  },
   calendarContainer: {
-    flex: 1,
+    marginTop: 20,
+    marginBottom: 15,
+    width: 350,
     justifyContent: 'center',
   },
   calendar: {
     width: '100%',
+    backgroundColor: '#404040',
+    borderRadius: 20,
   },
   timesContainer: {
     flex: 1,

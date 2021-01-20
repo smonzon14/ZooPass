@@ -31,21 +31,29 @@ export default class Profile extends Component {
     };
   }
   getUserInfo() {
-    return Fire.getCurrentUserInfo().then((res) => {
-      console.log(res);
-      this.setState({
-        bio: res.bio,
-        gender: res.gender,
-        birthday: res.birthday === null ? new Date() : new Date(res.birthday),
+    return Fire.getCurrentUserInfo()
+      .then((res) => {
+        console.log(res);
+        this.setState({
+          bio: res.bio,
+          gender: res.gender,
+          birthday: res.birthday === null ? new Date() : new Date(res.birthday),
+        });
+        return res;
+      })
+      .catch(() => {
+        return alert('Error', 'Error Retrieving User Information.');
       });
-      return res;
-    });
   }
   saveUserInfo() {
     return new FirebaseHelper()
       .updateUserInfo(this.state.bio, this.state.gender, this.state.birthday)
       .then((res) => {
+        alert('Saved!', 'Successfully saved new user info.');
         return res;
+      })
+      .catch(() => {
+        return alert('Error', 'Error Saving User Information.');
       });
     //TODO: implement save user data
   }

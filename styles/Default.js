@@ -8,13 +8,14 @@ export default StyleSheet.create({
   },
   regularText: {
     color: 'white',
-    fontSize: 14,
+    fontSize: 15,
     padding: 5,
   },
   titleText: {
-    color: 'white',
     fontSize: 30,
-    padding: 15,
+    fontWeight: 'bold',
+    left: 15,
+    color: 'white',
   },
   headerText: {
     color: 'white',
@@ -22,9 +23,21 @@ export default StyleSheet.create({
     padding: 5,
   },
   textInput: {
-    height: 35,
+    fontSize: 15,
+    minHeight: 30,
     color: 'white',
-    borderBottomColor: 'red',
-    borderBottomWidth: 2,
+    margin: 15,
+    borderBottomColor: 'white',
+    backgroundColor: 'transparent',
+    borderBottomWidth: 1,
+  },
+  openModalButton: {
+    margin: 15,
+    marginBottom: 15,
+    backgroundColor: 'red',
+    color: 'white',
+    borderRadius: 20,
+    height: 40,
+    justifyContent: 'center',
   },
 });
