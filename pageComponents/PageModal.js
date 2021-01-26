@@ -10,7 +10,6 @@ import {
   Image,
 } from 'react-native';
 import React, {Component} from 'react';
-
 export default (props) => {
   const onOpen = () => {
     props.r.current?.open();

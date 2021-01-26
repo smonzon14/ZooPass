@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+
+import functions from '@react-native-firebase/functions';
 //import auth from 'firebase/auth';
 function capitalize(s) {
   if (typeof s !== 'string') {
@@ -17,61 +19,81 @@ function capitalize(s) {
   }
   return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 }
-async function CreateUser(email, password, first, last) {
-  first = capitalize(first);
-  last = capitalize(last);
+function CreateUser(email, password, first, last) {
+  const registerUserWithEmailAndPassword = functions().httpsCallable(
+    'registerUserWithEmailAndPassword',
+  );
+  return registerUserWithEmailAndPassword({email, password, first, last}).then(
+    (res) => {
+      const {success, message, uid} = res.data;
+      console.log(message);
+      if (success) {
+        LoginUser(email, password);
+      }
+    },
+  );
+  // first = capitalize(first);
+  // last = capitalize(last);
+  // auth()
+  //   .setPersistence('local')
+  //   .then(() => {
+  //     return auth()
+  //       .createUserWithEmailAndPassword(email, password)
+  //       .then((response) => {
+  //         const uid = response.user.uid;
+  //         const publicData = {
+  //           bday: null,
+  //           bio: '',
+  //           gender: 0,
+  //           numEvents: 0,
+  //           numFriends: 0,
+  //         }
+  //         const privateData = {
+  //           numRequests: 0,
+  //           userSince: new Date().toDateString(),
+  //         }
+  //         const data = {
+  //
+  //           first: first,
+  //           last: last,
+  //           photoUrl: undefined,
+  //         };
+  //         const usersRef = firestore().collection('users');
+  //         usersRef
+  //           .doc(uid)
+  //           .set(data)
+  //           .then(() => {
+  //             auth()
+  //               .currentUser.updateProfile({
+  //                 displayName: first + ' ' + last,
+  //               })
+  //               .then(() => {
+  //                 console.log('display name set successfully');
+  //               })
+  //               .catch((error) => {
+  //                 console.log('error setting display name: ' + error);
+  //               });
+  //             // auth()
+  //             //   .currentUser.sendEmailVerification()
+  //             //   .then(() => {
+  //             //     console.log('email sent');
+  //             //   })
+  //             //   .catch((error) => {
+  //             //     console.log(
+  //             //       'error while sending verification email: ' + error,
+  //             //     );
+  //             //   });
+  //             console.log('logged in.');
+  //           });
+  //       });
+  //   })
+  //   .catch((error) => {
+  //     alert(error);
+  //   });
+}
+function LoginUser(email, password) {
   auth()
     .setPersistence('local')
-    .then(() => {
-      return auth()
-        .createUserWithEmailAndPassword(email, password)
-        .then((response) => {
-          const uid = response.user.uid;
-          const data = {
-            bday: null,
-            bio: '',
-            gender: 0,
-            numEvents: 0,
-            numFriends: 0,
-            first: first,
-            last: last,
-            userSince: new Date().toDateString(),
-          };
-          const usersRef = firestore().collection('users');
-          usersRef
-            .doc(uid)
-            .set(data)
-            .then(() => {
-              auth()
-                .currentUser.updateProfile({
-                  displayName: first + ' ' + last,
-                })
-                .then(() => {
-                  console.log('display name set successfully');
-                })
-                .catch((error) => {
-                  console.log('error setting display name: ' + error);
-                });
-              // auth()
-              //   .currentUser.sendEmailVerification()
-              //   .then(() => {
-              //     console.log('email sent');
-              //   })
-              //   .catch((error) => {
-              //     console.log(
-              //       'error while sending verification email: ' + error,
-              //     );
-              //   });
-              console.log('logged in.');
-            });
-        });
-    })
-    .catch((error) => {
-      alert(error);
-    });
-}
-async function LoginUser(email, password) {
-  auth()
     .signInWithEmailAndPassword(email, password)
     .then((response) => {
       const uid = response.user.uid;
@@ -91,6 +113,7 @@ async function LoginUser(email, password) {
       alert(error);
     });
 }
+
 export default class Signup extends React.Component {
   state = {email: '', password: '', first: '', last: '', signingUp: true};
 

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import DefaultStyles from '../styles/Default.js';
 import AddFriends from '../tabs/AddFriends.js';
+
 let InvitesList = [
   {
     title: 'hello world',
@@ -65,7 +66,6 @@ export default class Invites extends Component {
             }
           />
         </SafeAreaView>
-
         <AddFriends r={this.modalRef} />
       </View>
     );

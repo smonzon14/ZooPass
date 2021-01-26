@@ -1,4 +1,4 @@
-import React, {Component, useState, useEffect} from 'react';
+import React, {Component, useState, useEffect, useRef} from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,20 +12,32 @@ import {
 import DefaultStyles from '../styles/Default.js';
 
 import Modal from '../pageComponents/PageModal.js';
-import Fire, {FirebaseHelper} from '../FirebaseHelper.js';
+import Fire from '../FirebaseHelper.js';
+import {Portal} from 'react-native-portalize';
+import UserInfoView from '../tabs/UserInfoView.js';
 
-const userSearchItem = ({item}) => {
-  return (
-    <View>
-      <Text style={DefaultStyles.headerText}>
-        {item.first + ' ' + item.last}
-      </Text>
-    </View>
-  );
-};
+//Fire.sendFriendRequest(item.id)
 export default (props) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const userInfoModalRef = useRef();
+  const onSearchItemPress = (item) => {
+    setSelectedUser(item);
+    userInfoModalRef.current?.open();
+  };
+  const userSearchItem = ({item}) => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          onSearchItemPress(item);
+        }}>
+        <Text style={DefaultStyles.headerText}>
+          {item.first + ' ' + item.last}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
   useEffect(() => {
     const timeOutId = setTimeout(() => getUsers(searchQuery), 500);
     return () => clearTimeout(timeOutId);
@@ -34,7 +46,7 @@ export default (props) => {
     if (text === '') {
       return;
     }
-    FirebaseHelper.getUsersMatching(text).then((res) => {
+    Fire.getUsersMatching(text).then((res) => {
       const results = [];
       res.forEach((user, i) => {
         console.log(user.id + ' => ' + user.data().first);
@@ -66,6 +78,15 @@ export default (props) => {
           keyExtractor={(item) => item.id}
         />
       </View>
+      <Portal>
+        <Modal r={userInfoModalRef}>
+          <UserInfoView
+            getSelectedUser={() => {
+              return selectedUser;
+            }}
+          />
+        </Modal>
+      </Portal>
     </Modal>
   );
 };

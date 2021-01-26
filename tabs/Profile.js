@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   TextInput,
   Modal,
+  Image,
   TouchableOpacity,
 } from 'react-native';
 import OptionList from '../pageComponents/OptionList.js';
@@ -17,7 +18,8 @@ import Genders from '../enums/Genders.js';
 import DatePicker from 'react-native-date-picker';
 import DropDownPicker from 'react-native-dropdown-picker';
 import CustomPromptModal from '../pageComponents/CustomPromptModal.js';
-import Fire, {FirebaseHelper} from '../FirebaseHelper.js';
+import Fire from '../FirebaseHelper.js';
+import {selectImageFile} from '../SystemImage.js';
 export default class Profile extends Component {
   constructor(props) {
     super(props);
@@ -28,6 +30,7 @@ export default class Profile extends Component {
       birthday: new Date(),
       editGender: false,
       editBDay: false,
+      profilePhotoResourcePath: {},
     };
   }
   getUserInfo() {
@@ -37,6 +40,7 @@ export default class Profile extends Component {
         this.setState({
           bio: res.bio,
           gender: res.gender,
+          profilePhotoResourcePath: res.photoURL ? {uri: res.photoURL} : {},
           birthday: res.birthday === null ? new Date() : new Date(res.birthday),
         });
         return res;
@@ -46,23 +50,48 @@ export default class Profile extends Component {
       });
   }
   saveUserInfo() {
-    return new FirebaseHelper()
-      .updateUserInfo(this.state.bio, this.state.gender, this.state.birthday)
+    return Fire.updateUserInfo(
+      this.state.bio,
+      this.state.gender,
+      this.state.birthday,
+    )
       .then((res) => {
-        alert('Saved!', 'Successfully saved new user info.');
-        return res;
+        Fire.updateUserProfileImage(this.state.profilePhotoResourcePath.uri)
+          .then((res) => {
+            alert('Saved!', 'Successfully saved new user info.');
+            return res;
+          })
+          .catch((err) => {
+            alert('Error saving user image.');
+          });
       })
-      .catch(() => {
+      .catch((err) => {
+        console.log(err);
         return alert('Error', 'Error Saving User Information.');
       });
     //TODO: implement save user data
   }
-  componentWillUnmount() {
-    console.log('unmount');
-  }
   render() {
     return (
       <View style={DefaultStyles.container}>
+        <Image
+          source={{uri: this.state.profilePhotoResourcePath.uri}}
+          resizeMode="cover"
+          style={{
+            height: 100,
+            width: 100,
+
+            borderRadius: 50,
+          }}
+        />
+        <TouchableOpacity
+          onPress={() => {
+            selectImageFile((source) => {
+              this.setState({profilePhotoResourcePath: source});
+            });
+          }}>
+          <Text style={DefaultStyles.regularText}>Edit Photo</Text>
+        </TouchableOpacity>
         <TextInput
           style={DefaultStyles.textInput}
           placeholder="bio"
