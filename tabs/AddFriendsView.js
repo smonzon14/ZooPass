@@ -1,21 +1,15 @@
-import React, {Component, useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   StyleSheet,
   Text,
   View,
-  StatusBar,
   TouchableOpacity,
-  SafeAreaView,
-  FlatList,
   TextInput,
-  Image,
 } from 'react-native';
 import DefaultStyles from '../styles/Default.js';
 import {userItem} from '../pageComponents/ListItems.js';
-import Modal from '../pageComponents/PageModal.js';
 import Fire from '../FirebaseHelper.js';
 import {Portal} from 'react-native-portalize';
-import UserInfoView from '../tabs/UserInfoView.js';
 import CustomHeader from '../pageComponents/CustomHeader.js';
 import {Modalize} from 'react-native-modalize';
 import OtherUserInfoView from '../tabs/OtherUserInfoView.js';

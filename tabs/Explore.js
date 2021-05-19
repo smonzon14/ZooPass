@@ -1,13 +1,7 @@
 /* @flow */
 
 import React, {Component} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
-} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import CustomMapView from '../pageComponents/CustomMapView.js';
 import DefaultStyles from '../styles/Default.js';
 import MapView, {PROVIDER_GOOGLE} from 'react-native-maps';

@@ -1,13 +1,7 @@
 /* @flow */
 
 import React, {Component} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
-} from 'react-native';
+import {View, Text, StyleSheet, SafeAreaView} from 'react-native';
 //import LinearGradient from 'react-native-linear-gradient';
 import DefaultStyles from '../styles/Default.js';
 export default class CustomHeader extends Component {

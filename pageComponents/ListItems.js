@@ -6,19 +6,14 @@ import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
 const userItem = ({item}, onPress) => {
   return (
     <TouchableOpacity
-      style={{flexDirection: 'row', padding: 10}}
+      style={styles.userItemContainer}
       onPress={() => {
         onPress(item);
       }}>
       <Image
         source={{uri: item.photoURL}}
         resizeMode="cover"
-        style={{
-          height: 60,
-          width: 60,
-          backgroundColor: 'black',
-          borderRadius: 30,
-        }}
+        style={styles.profileImage}
       />
       <View style={{alignSelf: 'center'}}>
         <Text style={styles.nameText}>{item.first + ' ' + item.last}</Text>
@@ -33,6 +28,16 @@ const eventItem = () => {};
 export {userItem, eventItem};
 
 const styles = StyleSheet.create({
+  userItemContainer: {
+    flexDirection: 'row',
+    padding: 10,
+  },
+  profileImage: {
+    height: 60,
+    width: 60,
+    backgroundColor: 'black',
+    borderRadius: 30,
+  },
   container: {
     flex: 1,
     backgroundColor: 'blue',

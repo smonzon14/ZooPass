@@ -1,15 +1,14 @@
 /* @flow */
 
-import React, {Picker, Component} from 'react';
+import React, {Component} from 'react';
 import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
 import Fire from '../FirebaseHelper.js';
 import FriendsView from '../tabs/FriendsView.js';
 import EditProfileView from '../tabs/EditProfileView.js';
 import UserQR from '../qrcode/UserQR.js';
 import CustomHeader from '../pageComponents/CustomHeader.js';
-import QRBorder from '../qrcode/QRBorder.js';
 import auth from '@react-native-firebase/auth';
-import {format, formatDistance, subDays, isSameDay} from 'date-fns';
+import {format, formatDistance, isSameDay} from 'date-fns';
 function formatPostedDate(date) {
   return formatDistance(date, new Date(), {addSuffix: true});
 }

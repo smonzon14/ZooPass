@@ -17,7 +17,6 @@ import CustomMultiSelectCalendar from '../pageComponents/CustomMultiSelectCalend
 import CustomPromptModal from '../pageComponents/CustomPromptModal.js';
 import {selectImageFile} from '../SystemImage.js';
 import Fire from '../FirebaseHelper';
-import Modal from '../pageComponents/PageModal.js';
 import CheckBox from '@react-native-community/checkbox';
 import {Modalize} from 'react-native-modalize';
 

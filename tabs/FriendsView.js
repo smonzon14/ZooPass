@@ -1,19 +1,8 @@
 /* @flow */
 
-import React, {Component, forwardRef, useState, useRef, useEffect} from 'react';
-import {
-  View,
-  Animated,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  FlatList,
-  Image,
-} from 'react-native';
+import React, {forwardRef, useState, useRef, useEffect} from 'react';
+import {View, Animated, TouchableOpacity, Text, StyleSheet} from 'react-native';
 import Friends from '../data/Friends.js';
-import UsersFlatList from '../pageComponents/UsersFlatList.js';
-import Modal from '../pageComponents/PageModal.js';
 import DefaultStyles from '../styles/Default.js';
 import {Modalize} from 'react-native-modalize';
 import CustomHeader from '../pageComponents/CustomHeader.js';

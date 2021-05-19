@@ -1,7 +1,7 @@
 /* @flow */
 
 import React, {Component} from 'react';
-import {View, Text, StyleSheet, SafeAreaView} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 
 import DefaultStyles from '../styles/Default.js';
 import CustomCalendar from '../pageComponents/CustomCalendar.js';
