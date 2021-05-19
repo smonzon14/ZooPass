@@ -1,7 +1,13 @@
 /* @flow */
 
 import React, {Component} from 'react';
-import {View, Text, StyleSheet, SafeAreaView} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  TouchableOpacity,
+} from 'react-native';
 //import LinearGradient from 'react-native-linear-gradient';
 import DefaultStyles from '../styles/Default.js';
 export default class CustomHeader extends Component {
@@ -11,11 +17,26 @@ export default class CustomHeader extends Component {
         statusBarProps={{barStyle: 'light-content'}}
         style={{
           width: '100%',
-          backgroundColor: 'black',
+          backgroundColor:
+            this.props.backgroundColor == null
+              ? 'transparent'
+              : this.props.backgroundColor,
           marginBottom: 15,
-          marginTop: 75,
+          marginTop: this.props.top == null ? 30 : this.props.top,
+          flexDirection: 'row',
         }}>
         <Text style={DefaultStyles.titleText}>{this.props.title}</Text>
+        {this.props.buttonComponent && (
+          <View
+            style={{
+              position: 'absolute',
+              right: 10,
+              alignSelf: 'center',
+              visible: this.props.buttonComponent,
+            }}>
+            {this.props.buttonComponent}
+          </View>
+        )}
       </SafeAreaView>
     );
     // return (

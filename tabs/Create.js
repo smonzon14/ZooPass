@@ -19,6 +19,9 @@ import {selectImageFile} from '../SystemImage.js';
 import Fire from '../FirebaseHelper';
 import Modal from '../pageComponents/PageModal.js';
 import CheckBox from '@react-native-community/checkbox';
+import {Modalize} from 'react-native-modalize';
+
+import CustomHeader from '../pageComponents/CustomHeader.js';
 function parseTime(dateTime) {
   let hours = dateTime.getHours();
   let meridian = hours < 12 ? 'AM' : 'PM';
@@ -62,9 +65,19 @@ export default class Create extends Component {
   };
   render() {
     return (
-      <Modal r={this.props.r}>
+      <Modalize
+        ref={this.props.r}
+        modalStyle={{backgroundColor: 'black'}}
+        handleStyle={{backgroundColor: 'white'}}>
         <View style={{...DefaultStyles.container}}>
-          <Text style={DefaultStyles.titleText}>Create</Text>
+          <CustomHeader
+            title="Create"
+            buttonComponent={
+              <TouchableOpacity onPress={() => this.props.r.current?.close()}>
+                <Text style={DefaultStyles.cancelButton}>Cancel</Text>
+              </TouchableOpacity>
+            }
+          />
           <TouchableHighlight
             style={{
               width: 150,
@@ -257,7 +270,7 @@ export default class Create extends Component {
             </View>
           </CustomPromptModal>
         </View>
-      </Modal>
+      </Modalize>
     );
   }
 }

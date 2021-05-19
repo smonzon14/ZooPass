@@ -9,7 +9,9 @@ const exploreCollection = firestore().collection('explore');
 function authUser() {
   return auth().currentUser;
 }
-
+const sendReq = functions().httpsCallable('sendFriendRequest');
+const removeFriend = functions().httpsCallable('removeFriend');
+const getStatus = functions().httpsCallable('getFriendAndRequestStatus');
 class FirebaseHelper {
   //Create
   static async shareEvent(event, image = null) {
@@ -42,10 +44,16 @@ class FirebaseHelper {
     return {
       email: user.email,
       created: new Date(user.metadata.creationTime),
-      ...(await FirebaseHelper.getUserPublicInfoWithUID(user.uid)),
+      ...(await FirebaseHelper.getUserPrivateInfoWithUID(user.uid)),
       ...(await FirebaseHelper.getUserBaseInfoWithUID(user.uid)),
+      ...(await FirebaseHelper.getUserPublicInfoWithUID(user.uid)),
     };
   }
+  // Returns:{
+  // first
+  // last
+  // photoURL
+  // username }
   static getUserBaseInfoWithUID(uid) {
     return firestore()
       .collection('users')
@@ -53,18 +61,18 @@ class FirebaseHelper {
       .get()
       .then((snap) => {
         if (snap.exists) {
-          return snap.data();
+          return {...snap.data(), invalidUser: false};
         }
         return {
-          first: '',
-          last: '',
-          photoURL: null,
-          username: null,
           invalidUser: true,
         };
       })
       .catch((err) => console.log(err));
   }
+  // Returns: {
+  // bio
+  // numEvents
+  // numFriends }
   static getUserPublicInfoWithUID(uid) {
     return firestore()
       .collection('users/' + uid + '/info')
@@ -72,19 +80,45 @@ class FirebaseHelper {
       .get()
       .then((snap) => {
         if (snap.exists) {
-          return snap.data();
+          return {...snap.data(), invalidUser: false};
         }
-        return {bio: '', gender: 0, birthday: null, invalidUser: true};
+        return {invalidUser: true};
       })
       .catch((err) => console.log(err));
   }
-  static async getUsersMatching(text) {
-    return await usersCollection
+  // Returns:
+  // {numRequests
+  // Gender
+  // birthday
+  // usernameUpdate}
+  static getUserPrivateInfoWithUID(uid) {
+    return firestore()
+      .collection('users/' + uid + '/info')
+      .doc('private')
+      .get()
+      .then((snap) => {
+        if (snap.exists) {
+          return {...snap.data(), invalidUser: false};
+        }
+        return {invalidUser: true};
+      })
+      .catch((err) => console.log(err));
+  }
+  static getUsersMatching(text) {
+    return usersCollection
       .where('first', '>=', text)
       .where('first', '<=', text + '\uf8ff')
       .orderBy('first')
-      .limit(10)
-      .get();
+      .limit(20)
+      .get()
+      .then((snap) => {
+        const results = [];
+        console.log('Hello');
+        snap.docs.map((user) => {
+          results.push({...user.data(), id: user.id});
+        });
+        return results;
+      });
   }
   //Update
   static updateEmail(email) {
@@ -96,27 +130,37 @@ class FirebaseHelper {
   static async updateUserInfo(bio, gender, bday) {
     return await firestore()
       .collection('users/' + authUser().uid + '/info')
-      .doc('public')
+      .doc('private')
       .set(
         {
-          bio: bio,
           birthday: bday.toDateString(),
           gender: gender,
         },
         {merge: true},
-      );
+      )
+      .then(async () => {
+        return await firestore()
+          .colection('users/' + authUser().uid + '/info')
+          .doc('public')
+          .set({bio: bio}, {merge: true});
+      });
+  }
+  static getFriendAndRequestStatus(friend) {
+    return getStatus({friend}).then((res) => {
+      return res.data;
+    });
   }
   static sendFriendRequest(sendTo) {
-    let sendReq = functions().httpsCallable('sendFriendRequest');
-    return sendReq({sendTo})
-      .then((res) => {
-        console.log(res.data.message);
-        return res.data;
-      })
-      .catch((err) => {
-        console.log(err);
-        return;
-      });
+    return sendReq({sendTo}).then((res) => {
+      console.log(res.data.message);
+      return res.data;
+    });
+  }
+  static unfriend(friend) {
+    return removeFriend({friend}).then((res) => {
+      console.log(res.data.message);
+      return res.data;
+    });
   }
   static signOutUser() {
     return auth()

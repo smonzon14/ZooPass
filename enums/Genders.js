@@ -1,9 +1,10 @@
-const options = {Other: 0, Male: 1, Female: 2};
+const GendersEnum = {Other: 0, Male: 1, Female: 2};
 const Genders = {
-  ...options,
+  ...GendersEnum,
   valueToKey: (val) => {
-    return Object.keys(options)[val];
+    return Object.keys(GendersEnum)[val];
   },
 };
 
+export {GendersEnum};
 export default Genders;

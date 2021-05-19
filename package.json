@@ -16,6 +16,7 @@
     "@react-native-firebase/firestore": "^10.5.1",
     "@react-native-firebase/functions": "^10.5.1",
     "@react-native-firebase/storage": "^10.5.1",
+    "date-fns": "^2.21.3",
     "framer-motion": "^3.2.1",
     "metro-react-native-babel-transformer": "0.58.0",
     "react": "^16.3.0",
@@ -33,6 +34,8 @@
     "react-native-modalize": "^2.0.8",
     "react-native-paper": "^4.6.0",
     "react-native-portalize": "^1.0.7",
+    "react-native-qrcode-svg": "^6.1.1",
+    "react-native-svg": "^12.1.1",
     "react-native-tabs": "^1.0.9",
     "react-native-vector-icons": "^7.1.0"
   },

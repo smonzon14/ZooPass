@@ -93,7 +93,6 @@ function CreateUser(email, password, first, last) {
 }
 function LoginUser(email, password) {
   auth()
-    .setPersistence('local')
     .signInWithEmailAndPassword(email, password)
     .then((response) => {
       const uid = response.user.uid;

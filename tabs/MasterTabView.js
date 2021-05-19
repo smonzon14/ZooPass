@@ -6,31 +6,36 @@ import Calendar from './Calendar.js';
 import Create from './Create.js';
 import Explore from './Explore.js';
 import Profile from './Profile.js';
-import CustomHeader from '../pageComponents/CustomHeader.js';
 import {Host} from 'react-native-portalize';
+
 export default class MasterTabView extends Component {
-  state = {page: 'Invites', createShowing: false};
-  modalRef = React.createRef();
-  views = {
-    Invites: <Invites />,
-    Calendar: <Calendar />,
-    Explore: <Explore />,
-    Profile: <Profile />,
-  };
-  openCreateModal = () => {
-    this.modalRef.current?.open();
-  };
-  getTabComponent() {
-    return this.views[this.state.page];
+  constructor(props) {
+    super(props);
+    this.invites = <Invites />;
+    this.calendar = <Calendar />;
+    this.explore = <Explore />;
+    this.profile = <Profile />;
   }
+  state = {page: 'Invites', createShowing: false};
+  createModalRef = React.createRef();
+
+  openCreateModal = () => {
+    this.createModalRef.current?.open();
+  };
+
   render() {
     return (
       <Host>
         <SafeAreaView style={styles.container}>
           <StatusBar barStyle="light-content" />
-          <Create r={this.modalRef} />
-          <CustomHeader title={this.state.page} />
-          <View style={styles.selectedPage}>{this.getTabComponent()}</View>
+          <Create r={this.createModalRef} />
+
+          <View style={styles.selectedPage}>
+            {this.state.page === 'Invites' && this.invites}
+            {this.state.page === 'Calendar' && this.calendar}
+            {this.state.page === 'Explore' && this.explore}
+            {this.state.page === 'Profile' && this.profile}
+          </View>
 
           <Tabs
             selected={this.state.page}

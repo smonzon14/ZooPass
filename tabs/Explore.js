@@ -11,10 +11,13 @@ import {
 import CustomMapView from '../pageComponents/CustomMapView.js';
 import DefaultStyles from '../styles/Default.js';
 import MapView, {PROVIDER_GOOGLE} from 'react-native-maps';
+import CustomHeader from '../pageComponents/CustomHeader.js';
+
 export default class Explore extends Component {
   render() {
     return (
       <View style={DefaultStyles.container}>
+        <CustomHeader title="Explore" />
         <View style={styles.categoryContainer}>
           <TouchableOpacity style={styles.toggleCategoryButtonOn}>
             <Text style={{...DefaultStyles.regularText, color: 'red'}}>
@@ -25,11 +28,7 @@ export default class Explore extends Component {
             <Text style={DefaultStyles.regularText}>World</Text>
           </TouchableOpacity>
         </View>
-        <View
-          style={{
-            ...StyleSheet.absoluteFillObject,
-            bottom: 80,
-          }}>
+        <View style={[StyleSheet.absoluteFillObject, {top: 50}]}>
           <MapView
             provider={PROVIDER_GOOGLE} // remove if not using Google Maps
             style={{...StyleSheet.absoluteFillObject, top: 80}}

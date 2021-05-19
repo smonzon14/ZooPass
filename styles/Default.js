@@ -6,6 +6,12 @@ export default StyleSheet.create({
     color: 'white',
     flex: 1,
   },
+  cancelButton: {
+    textDecorationLine: 'underline',
+    color: '#dd0000',
+    fontSize: 15,
+    padding: 5,
+  },
   regularText: {
     color: 'white',
     fontSize: 15,

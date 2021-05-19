@@ -5,6 +5,7 @@ import {View, Text, StyleSheet, SafeAreaView} from 'react-native';
 import DefaultStyles from '../styles/Default.js';
 import Fire from '../FirebaseHelper.js';
 import Genders from '../enums/Genders.js';
+import Friends from '../data/Friends.js';
 const UserInfoView = (props) => {
   const [user, setUser] = useState(undefined);
   const [userPublicInfo, setUserPublicInfo] = useState({
@@ -18,6 +19,7 @@ const UserInfoView = (props) => {
       return;
     }
     console.log('nbadfhbswowfiwbfiosbdis: ' + u.id);
+    console.log(Friends.getList());
     setUser(u);
     Fire.getUserPublicInfoWithUID(u.id).then((info) => {
       console.log(info);

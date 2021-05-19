@@ -9,8 +9,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import DefaultStyles from '../styles/Default.js';
-import AddFriends from '../tabs/AddFriends.js';
 
+import CustomHeader from '../pageComponents/CustomHeader.js';
 let InvitesList = [
   {
     title: 'hello world',
@@ -50,6 +50,7 @@ export default class Invites extends Component {
   render() {
     return (
       <View style={DefaultStyles.container}>
+        <CustomHeader title="Invites" />
         <SafeAreaView>
           <TouchableOpacity onPress={this.openAddFriendModal}>
             <Text style={DefaultStyles.regularText}>Add Friends</Text>
@@ -66,7 +67,6 @@ export default class Invites extends Component {
             }
           />
         </SafeAreaView>
-        <AddFriends r={this.modalRef} />
       </View>
     );
   }
