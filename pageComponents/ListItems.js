@@ -1,6 +1,6 @@
 /* @flow weak */
 
-import React from 'react';
+import React, {useState} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
 
 const userItem = ({item}, onPress) => {

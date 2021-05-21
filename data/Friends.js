@@ -18,7 +18,6 @@ class Friends {
     }
     observer = friendsCollection.onSnapshot((collSnapshot) => {
       this.list.length = 0;
-      console.log(this.list);
       collSnapshot.docs.map((doc) => {
         this.list.push({id: doc.id, ...doc.data()});
       });
@@ -36,7 +35,15 @@ class Friends {
     console.log('Friends observer detatched.');
   }
   static getList() {
-    console.log('FRIENDS: ' + this.list);
+    return this.list;
+  }
+  static retrieveList() {
+    this.list.length = 0;
+    friendsCollection.get().then((snap) => {
+      snap.forEach((doc) => {
+        this.list.push({id: doc.id, ...doc.data()});
+      });
+    });
     return this.list;
   }
 }
