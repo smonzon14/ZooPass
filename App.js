@@ -3,10 +3,11 @@ import React, {useState, useEffect} from 'react';
 import auth from '@react-native-firebase/auth';
 import Signup from './Signup.js';
 import MasterTabView from './tabs/MasterTabView.js';
+import Geocoder from 'react-native-geocoding';
+
 export default function App() {
   // Set an initializing state whilst Firebase connects
-  const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState();
+  const [user, setUser] = useState(null);
   // this.options = {
   //   topBar: {
   //     visibility: 'none',
@@ -20,42 +21,16 @@ export default function App() {
   //   },
   // };
   // Handle user state changes
-
-  function onAuthStateChanged(user) {
-    setUser(user);
-    if (initializing) {
-      setInitializing(false);
-    }
-  }
-
   useEffect(() => {
-    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    const subscriber = auth().onAuthStateChanged((user) => setUser({user}));
     return subscriber; // unsubscribe on unmount
   });
 
-  if (initializing) {
-    return <View style={styles.loadingScreen} />;
-  }
-
   if (!user) {
     return <Signup />;
+  } else {
+    return <MasterTabView />;
   }
-
-  return (
-    <MasterTabView />
-    // <SafeAreaView style={styles.background}>
-    //   <Text style={styles.basicText}>Welcome {user.email}</Text>
-    //   <TouchableOpacity
-    //     style={styles.logoutBtn}
-    //     onPress={() =>
-    //       auth()
-    //         .signOut()
-    //         .then(() => console.log('logged out.'))
-    //     }>
-    //     <Text style={styles.logout}>Logout</Text>
-    //   </TouchableOpacity>
-    // </SafeAreaView>
-  );
 }
 
 const styles = StyleSheet.create({

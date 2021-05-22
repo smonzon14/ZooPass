@@ -193,6 +193,11 @@ export default class EditProfileView extends React.Component {
               maximumDate={new Date(2008, 0, 0)}
             />
           </CustomPromptModal>
+          <TouchableOpacity
+            style={{backgroundColor: 'red', borderRadius: 5, padding: 10}}
+            onPress={() => Fire.signOutUser()}>
+            <Text style={DefaultStyles.boldText}>Sign Out</Text>
+          </TouchableOpacity>
         </Modalize>
       </Portal>
     );

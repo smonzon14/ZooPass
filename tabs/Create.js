@@ -12,6 +12,7 @@ import {
   Image,
   Dimensions,
   FlatList,
+  Animated,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import DefaultStyles from '../styles/Default.js';
@@ -27,6 +28,11 @@ import CustomHeader from '../pageComponents/CustomHeader.js';
 import Swiper from 'react-native-swiper';
 import {userItem} from '../pageComponents/ListItems.js';
 import Friends from '../data/Friends.js';
+import Geocoder from 'react-native-geocoding';
+import GetLocation from 'react-native-get-location';
+
+Geocoder.init('AIzaSyBFXlfZ7jSlpu9VyV7u2deC7EwkjPQgS8I');
+let userLocation = null;
 
 function formatStartEndDate(startDate, endDate) {
   if (isSameDay(startDate, endDate)) {
@@ -59,7 +65,7 @@ export default class Create extends Component {
   defaultTime = getDefaultTime();
   state = {
     title: '',
-    description: '',
+    message: '',
     startDate: this.defaultTime,
     endDate: this.defaultTime,
     startTime: this.defaultTime,
@@ -73,6 +79,95 @@ export default class Create extends Component {
     resourcePath: {},
     friendsList: [],
     invitedUsersList: [],
+    mapAnim: new Animated.Value(0),
+    addressSearches: [],
+    location: {longitude: -71.0589, latitude: 42.3601},
+    searchQuery: '',
+  };
+  componentDidMount() {
+    console.log('MOUNTED');
+    GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 10000,
+    })
+      .then((location) => {
+        return Geocoder.from(location);
+      })
+      .then((json) => {
+        var addressComponent = json.results[0].address_components.reduce(
+          (acc, e) => {
+            return acc + e.short_name.toString() + ' ';
+          },
+          '',
+        );
+        const coordinates = {
+          latitude: json.results[0].geometry.location.lat,
+          longitude: json.results[0].geometry.location.lng,
+        };
+        this.setState({location: coordinates});
+        userLocation = {
+          id: '-1',
+          address: addressComponent,
+          location: coordinates,
+        };
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.searchQuery !== this.state.searchQuery) {
+      this.handleSearch();
+    }
+  }
+  handleSearch = () => {
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => {
+      this.searchForLocations();
+    }, 250);
+  };
+  searchForLocations = () => {
+    let list = [];
+    if (userLocation) {
+      list.push(userLocation);
+    }
+    if (this.state.searchQuery !== '') {
+      Geocoder.from(this.state.searchQuery)
+        .then((json) => {
+          json.results.forEach((res, i) => {
+            res.address_components = res.address_components.filter(
+              (_, x) => x < 6,
+            );
+            list.push({
+              id: i.toString(),
+              location: {
+                latitude: res.geometry.location.lat,
+                longitude: res.geometry.location.lng,
+              },
+              address: res.address_components.reduce((acc, e) => {
+                return acc + e.short_name.toString() + ' ';
+              }, ''),
+            });
+          });
+        })
+        .catch((error) => console.log(error));
+    }
+
+    this.setState({addressSearches: list});
+  };
+  growMap = () => {
+    Animated.timing(this.state.mapAnim, {
+      toValue: 250,
+      duration: 750,
+      useNativeDriver: false,
+    }).start();
+  };
+  shrinkMap = () => {
+    Animated.timing(this.state.mapAnim, {
+      toValue: 0,
+      duration: 750,
+      useNativeDriver: false,
+    }).start();
   };
   constructor(props) {
     super(props);
@@ -82,37 +177,44 @@ export default class Create extends Component {
   //   this.setState({friendsList: Friends.retrieveList()});
   // }
   render() {
+    if (this.state.editAddress || this.state.isOnline) {
+      this.shrinkMap();
+    } else {
+      this.growMap();
+    }
     const pageChanged = (index) => {
       this.setState({page: index});
       if (index === 1) {
         this.setState({friendsList: Friends.retrieveList()});
       }
     };
+    const shareEvent = () => {
+      if (this.state.title === '' || this.state.message === '') {
+        return alert('Must have a title and message.');
+      }
+      const event = {
+        title: this.state.title,
+        message: this.state.message,
+        start: combinedDates(this.state.startDate, this.state.startTime),
+        end: combinedDates(this.state.endDate, this.state.endTime),
+        address: this.state.address,
+        isPublic: this.state.isPublic,
+        isOnline: this.state.isOnline,
+      };
+      return Fire.shareEvent(event, this.state.resourcePath.uri)
+        .then((msg) => {
+          console.log('SUCCESS: ' + msg);
+          alert('Successfully Shared!');
+          this.props.r.current.close();
+        })
+        .catch((err) => {
+          alert('Error Sharing Event... Please Try Again');
+          console.log('error sharing event: ' + err);
+        });
+    };
     const RenderShareButton = () => (
       <TouchableOpacity
-        onPress={() => {
-          if (this.state.title === '' || this.state.description === '') {
-            return alert('Must have a Title and Message.');
-          }
-          const event = {
-            title: this.state.title,
-            description: this.state.description,
-            start: combinedDates(this.state.startDate, this.state.startTime),
-            end: combinedDates(this.state.endDate, this.state.endTime),
-            address: this.state.address,
-            isPublic: this.state.isPublic,
-          };
-          return Fire.shareEvent(event, this.state.resourcePath.uri)
-            .then((msg) => {
-              console.log('SUCCESS: ' + msg);
-              alert('Successfully Shared!');
-              this.props.r.current.close();
-            })
-            .catch((err) => {
-              alert('Error Sharing Event... Please Try Again');
-              console.log('error sharing event: ' + err);
-            });
-        }}
+        onPress={shareEvent}
         style={DefaultStyles.openModalButton}>
         <Text style={{...DefaultStyles.regularText, fontWeight: 'bold'}}>
           Share
@@ -225,7 +327,7 @@ export default class Create extends Component {
           ref={this.swiperRef}
           showsButtons={false}
           loadMinimal={true}
-          showsPagination={false}
+          showsPagination={true}
           index={0}
           loop={false}
           onIndexChanged={pageChanged}>
@@ -233,7 +335,7 @@ export default class Create extends Component {
             {/*Text Input fields*/}
             <View
               style={{
-                padding: 10,
+                padding: 0,
               }}>
               <View>
                 <Text style={styles.textInputLabelText}>Title</Text>
@@ -245,52 +347,6 @@ export default class Create extends Component {
                   onChangeText={(text) => this.setState({title: text})}
                 />
 
-                <Text style={styles.textInputLabelText}>Where</Text>
-                <View style={{flexDirection: 'row'}}>
-                  <TouchableWithoutFeedback
-                    disabled={this.state.isOnline}
-                    onPress={() => this.setState({editAddress: true})}>
-                    <View style={[DefaultStyles.textInput, {flex: 1}]}>
-                      <Text
-                        style={[
-                          DefaultStyles.regularText,
-                          {
-                            padding: 0,
-                            color: 'gray',
-                            position: 'absolute',
-                            bottom: 10,
-                          },
-                        ]}>
-                        {this.state.isOnline
-                          ? 'Online Event'
-                          : this.state.address}
-                      </Text>
-                    </View>
-                  </TouchableWithoutFeedback>
-                  {/*Is online checkbox*/}
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      padding: 15,
-                    }}>
-                    <Text
-                      style={{...DefaultStyles.regularText, paddingRight: 10}}>
-                      Online:
-                    </Text>
-                    <CheckBox
-                      boxType="square"
-                      tintColor="gray"
-                      onTintColor="yellow"
-                      onCheckColor="yellow"
-                      disabled={false}
-                      value={this.state.isOnline}
-                      onValueChange={(newValue) =>
-                        this.setState({isOnline: newValue})
-                      }
-                    />
-                  </View>
-                </View>
                 <Text style={styles.textInputLabelText}>When</Text>
                 <TouchableWithoutFeedback
                   onPress={() => this.setState({editTimeSpan: true})}>
@@ -312,29 +368,128 @@ export default class Create extends Component {
                     </Text>
                   </View>
                 </TouchableWithoutFeedback>
-              </View>
-              <CustomPromptModal
-                title="Find Address"
-                closeText="Close"
-                visible={this.state.editAddress}
-                onClose={() => this.setState({editAddress: false})}>
-                <View
-                  style={{
-                    width: 400,
-                    height: 400,
-                  }}>
-                  <MapView
-                    provider={PROVIDER_GOOGLE} // remove if not using Google Maps
-                    style={StyleSheet.absoluteFillObject}
-                    initialRegion={{
-                      latitude: 37.78825,
-                      longitude: -122.4324,
-                      latitudeDelta: 0.0922,
-                      longitudeDelta: 0.0421,
-                    }}
-                  />
+                <Text style={styles.textInputLabelText}>Where</Text>
+                <View>
+                  <View
+                    style={{
+                      width: '100%',
+                      height: 250,
+                      position: 'absolute',
+                    }}>
+                    <MapView
+                      pitchEnabled={false}
+                      rotateEnabled={false}
+                      scrollEnabled={false}
+                      provider={PROVIDER_GOOGLE} // remove if not using Google Maps
+                      style={StyleSheet.absoluteFillObject}
+                      initialRegion={{
+                        latitude: 37.78825,
+                        longitude: -122.4324,
+                        latitudeDelta: 0.0922,
+                        longitudeDelta: 0.0421,
+                      }}
+                      region={{
+                        ...this.state.location,
+                        latitudeDelta: 0.01,
+                        longitudeDelta: 0.01,
+                      }}
+                    />
+                  </View>
                 </View>
-              </CustomPromptModal>
+                <Animated.FlatList
+                  style={{
+                    top: this.state.mapAnim,
+                    backgroundColor: '#222',
+                    height: '100%',
+                  }}
+                  data={
+                    this.state.editAddress && !this.state.isOnline
+                      ? this.state.addressSearches
+                      : []
+                  }
+                  keyExtractor={(item) => item.id}
+                  renderItem={({item}) => (
+                    <TouchableOpacity
+                      onPress={() => {
+                        this.setState({editAddress: false});
+                        this.setState({
+                          address: item.address,
+                          location: item.location,
+                        });
+                      }}
+                      style={{height: 50, flexDirection: 'row', width: '100%'}}>
+                      <Text
+                        style={[
+                          {flexWrap: 'wrap', flex: 1},
+                          DefaultStyles.boldText,
+                        ]}>
+                        {item.address}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  ListHeaderComponent={
+                    <View
+                      style={{
+                        height: 70,
+                      }}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          backgroundColor: '#222',
+                        }}>
+                        <View style={[{flex: 1}]}>
+                          <TextInput
+                            style={[DefaultStyles.textInput]}
+                            onChangeText={(text) => {
+                              this.setState({searchQuery: text});
+                            }}
+                            editable={!this.state.isOnline}
+                            placeholder="Start typing..."
+                            placeholderTextColor="gray"
+                            onSubmitEditing={() =>
+                              this.setState({editAddress: false})
+                            }
+                            onFocus={() => {
+                              this.setState({editAddress: true});
+                              this.searchForLocations();
+                            }}>
+                            {this.state.isOnline
+                              ? 'Online Event'
+                              : this.state.address}
+                          </TextInput>
+                        </View>
+                        {/*Is online checkbox*/}
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            padding: 15,
+                          }}>
+                          <Text
+                            style={{
+                              ...DefaultStyles.regularText,
+                              paddingRight: 10,
+                            }}>
+                            Online:
+                          </Text>
+                          <CheckBox
+                            boxType="square"
+                            tintColor="gray"
+                            onTintColor="yellow"
+                            onCheckColor="yellow"
+                            disabled={false}
+                            value={this.state.isOnline}
+                            onValueChange={(newValue) =>
+                              this.setState({isOnline: newValue})
+                            }
+                          />
+                        </View>
+                      </View>
+                    </View>
+                  }
+                />
+              </View>
+
               {/* calendar modal*/}
               <CustomPromptModal
                 title="Start and End Date/Time"
@@ -389,7 +544,11 @@ export default class Create extends Component {
           <View>
             <TouchableHighlight
               style={{
-                backgroundColor: 'black',
+                backgroundColor: 'transparent',
+                margin: 15,
+                borderWidth: 1,
+                borderColor: 'gray',
+                borderRadius: 20,
               }}
               onPress={() => {
                 selectImageFile((source) => {
@@ -399,25 +558,24 @@ export default class Create extends Component {
               <View>
                 <Text
                   style={{
-                    ...DefaultStyles.regularText,
                     position: 'absolute',
                     alignSelf: 'center',
                     bottom: 100,
+                    color: 'gray',
+                    fontSize: 15,
                   }}>
-                  Add Image
+                  Add an Image
                 </Text>
                 <Image
                   source={{uri: this.state.resourcePath.uri}}
                   resizeMode="cover"
                   style={{
-                    height: Dimensions.get('window').width,
-                    width: '100%',
+                    height: Dimensions.get('window').width - 200,
+                    width: '70%',
                   }}
                 />
               </View>
             </TouchableHighlight>
-          </View>
-          <View>
             <View style={{padding: 10}}>
               <TextInput
                 style={[DefaultStyles.textInput, {height: 120}]}
@@ -426,9 +584,11 @@ export default class Create extends Component {
                 numberOfLines={4}
                 maxLength={300}
                 placeholderTextColor="gray"
-                onChangeText={(text) => this.setState({description: text})}
+                onChangeText={(text) => this.setState({message: text})}
               />
             </View>
+          </View>
+          <View>
             {/* is public check box */}
             <View
               style={{
@@ -504,7 +664,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   textInputLabelText: {
-    padding: 0,
+    padding: 5,
     fontSize: 12,
     color: 'white',
   },

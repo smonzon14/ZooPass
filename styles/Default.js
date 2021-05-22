@@ -36,7 +36,7 @@ export default StyleSheet.create({
   },
   textInput: {
     fontSize: 15,
-    minHeight: 35,
+    minHeight: 25,
     color: 'white',
     margin: 10,
     borderBottomColor: 'gray',

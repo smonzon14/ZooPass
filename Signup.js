@@ -12,6 +12,7 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
 import functions from '@react-native-firebase/functions';
+console.log('SIGNUP');
 //import auth from 'firebase/auth';
 function capitalize(s) {
   if (typeof s !== 'string') {
