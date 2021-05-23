@@ -1,35 +1,9 @@
 import React, {useState} from 'react';
 import {View, StyleSheet} from 'react-native';
 import {Calendar} from 'react-native-calendars';
-
+import {subDays, format} from 'date-fns';
 function formatDate(date) {
-  if (date === null) {
-    return null;
-  }
-  var d = new Date(date),
-    month = '' + (d.getMonth() + 1),
-    day = '' + d.getDate(),
-    year = d.getFullYear();
-
-  if (month.length < 2) {
-    month = '0' + month;
-  }
-  if (day.length < 2) {
-    day = '0' + day;
-  }
-  return [year, month, day].join('-');
-}
-
-function formatStringToDate(dateString) {
-  if (dateString === null) {
-    return null;
-  }
-  const d = new Date(
-    dateString.substring(0, 4),
-    dateString.substring(5, 7) - 1,
-    dateString.substring(8, 10),
-  );
-  return d;
+  return date ? format(date, 'Y-MM-dd') : null;
 }
 
 export default (props) => {
@@ -37,12 +11,10 @@ export default (props) => {
   const [day, setDay] = useState(props.startDate);
   const [dayLast, setDayLast] = useState(props.endDate);
   function updateStartDay(date) {
-    date = date ? formatStringToDate(date.dateString) : null;
     setDay(date);
     return props.startDayHandler ? props.startDayHandler(date) : null;
   }
   function updateEndDay(date) {
-    date = date ? formatStringToDate(date.dateString) : null;
     setDayLast(date);
     return props.endDayHandler ? props.endDayHandler(date) : null;
   }
@@ -51,18 +23,20 @@ export default (props) => {
       <Calendar
         minDate={today.toDateString()}
         onDayPress={(d) => {
+          const date = subDays(new Date(d.timestamp), -1);
+          console.log('Selected: ' + date);
           if (day === null) {
-            updateStartDay(d);
+            updateStartDay(date);
           } else {
             if (dayLast === null) {
               if (d.timestamp < Date.parse(day)) {
-                updateStartDay(d);
+                updateStartDay(date);
               } else {
-                updateEndDay(d);
+                updateEndDay(date);
               }
             } else {
               updateEndDay(null);
-              updateStartDay(d);
+              updateStartDay(date);
             }
           }
         }}

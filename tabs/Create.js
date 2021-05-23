@@ -23,7 +23,16 @@ import {selectImageFile} from '../SystemImage.js';
 import Fire from '../FirebaseHelper';
 import CheckBox from '@react-native-community/checkbox';
 import {Modalize} from 'react-native-modalize';
-import {format, isSameDay} from 'date-fns';
+import {
+  format,
+  isSameDay,
+  setHours,
+  setMinutes,
+  getHours,
+  subDays,
+  subHours,
+  getMinutes,
+} from 'date-fns';
 import CustomHeader from '../pageComponents/CustomHeader.js';
 import Swiper from 'react-native-swiper';
 import {userItem} from '../pageComponents/ListItems.js';
@@ -40,36 +49,26 @@ function formatStartEndDate(startDate, endDate) {
       format(startDate, 'eeee, MMMM dd · h:mm a - ') + format(endDate, 'h:mm a')
     );
   }
+  console.log('start: ' + startDate);
+  console.log('end: ' + endDate);
   return (
     format(startDate, 'eee, MMMM dd · h:mm a - ') +
     format(endDate, 'eee, MMMM dd · h:mm a')
   );
 }
 function combinedDates(date, time) {
-  const dateTime = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-  );
-  dateTime.setHours(time.getHours());
-  dateTime.setMinutes(time.getMinutes());
-  return dateTime;
+  return setHours(setMinutes(date, getMinutes(time)), getHours(time));
 }
-function getDefaultTime() {
-  const dateTime = new Date();
-  dateTime.setTime(new Date().getTime() + 1 * 60 * 60 * 1000);
-  return dateTime;
+function nextDay() {
+  return subDays(new Date(), -1);
 }
 
 export default class Create extends Component {
-  defaultTime = getDefaultTime();
   state = {
     title: '',
     message: '',
-    startDate: this.defaultTime,
-    endDate: this.defaultTime,
-    startTime: this.defaultTime,
-    endTime: this.defaultTime,
+    startDate: new Date(),
+    endDate: nextDay(),
     address: '',
     isPublic: false,
     isOnline: false,
@@ -169,6 +168,41 @@ export default class Create extends Component {
       useNativeDriver: false,
     }).start();
   };
+  shareEvent = () => {
+    if (this.state.title === '') {
+      return alert('Event needs to have a title.');
+    }
+    if (this.state.address === '') {
+      return alert('Event needs an address.');
+    }
+    const event = {
+      title: this.state.title,
+      message: this.state.message,
+      start: this.state.startDate,
+      end: this.state.endDate,
+      address: this.state.address,
+      latitude: this.state.location.latitude,
+      longitude: this.state.location.longitude,
+      isPublic: this.state.isPublic,
+      isOnline: this.state.isOnline,
+    };
+    return Fire.shareEvent(event, this.state.resourcePath.uri)
+      .then((msg) => {
+        console.log('SUCCESS: ' + msg);
+        alert('Successfully Shared!');
+        this.props.r.current.close();
+      })
+      .catch((err) => {
+        alert('Error Sharing Event... Please Try Again');
+        console.log('error sharing event: ' + err);
+      });
+  };
+  pageChanged = (index) => {
+    this.setState({page: index});
+    if (index === 2) {
+      this.setState({friendsList: Friends.retrieveList()});
+    }
+  };
   constructor(props) {
     super(props);
     this.swiperRef = React.createRef(null);
@@ -182,45 +216,6 @@ export default class Create extends Component {
     } else {
       this.growMap();
     }
-    const pageChanged = (index) => {
-      this.setState({page: index});
-      if (index === 1) {
-        this.setState({friendsList: Friends.retrieveList()});
-      }
-    };
-    const shareEvent = () => {
-      if (this.state.title === '' || this.state.message === '') {
-        return alert('Must have a title and message.');
-      }
-      const event = {
-        title: this.state.title,
-        message: this.state.message,
-        start: combinedDates(this.state.startDate, this.state.startTime),
-        end: combinedDates(this.state.endDate, this.state.endTime),
-        address: this.state.address,
-        isPublic: this.state.isPublic,
-        isOnline: this.state.isOnline,
-      };
-      return Fire.shareEvent(event, this.state.resourcePath.uri)
-        .then((msg) => {
-          console.log('SUCCESS: ' + msg);
-          alert('Successfully Shared!');
-          this.props.r.current.close();
-        })
-        .catch((err) => {
-          alert('Error Sharing Event... Please Try Again');
-          console.log('error sharing event: ' + err);
-        });
-    };
-    const RenderShareButton = () => (
-      <TouchableOpacity
-        onPress={shareEvent}
-        style={DefaultStyles.openModalButton}>
-        <Text style={{...DefaultStyles.regularText, fontWeight: 'bold'}}>
-          Share
-        </Text>
-      </TouchableOpacity>
-    );
     const toggleInviteUser = (user) => console.log('inviting: ' + user.id);
     const RenderActionButtons = () => {
       return (
@@ -293,7 +288,7 @@ export default class Create extends Component {
               </TouchableOpacity>
               <TouchableOpacity
                 style={DefaultStyles.openModalButton}
-                onPress={() => this.swiperRef.current.scrollBy(-1)}>
+                onPress={this.shareEvent}>
                 <Text style={DefaultStyles.boldText}>Share</Text>
               </TouchableOpacity>
             </View>
@@ -330,7 +325,7 @@ export default class Create extends Component {
           showsPagination={true}
           index={0}
           loop={false}
-          onIndexChanged={pageChanged}>
+          onIndexChanged={this.pageChanged}>
           <View style={{height: '100%'}}>
             {/*Text Input fields*/}
             <View
@@ -369,19 +364,23 @@ export default class Create extends Component {
                   </View>
                 </TouchableWithoutFeedback>
                 <Text style={styles.textInputLabelText}>Where</Text>
-                <View>
+                <View style={{padding: 10}}>
                   <View
                     style={{
                       width: '100%',
                       height: 250,
                       position: 'absolute',
+                      margin: 10,
                     }}>
                     <MapView
                       pitchEnabled={false}
                       rotateEnabled={false}
                       scrollEnabled={false}
                       provider={PROVIDER_GOOGLE} // remove if not using Google Maps
-                      style={StyleSheet.absoluteFillObject}
+                      style={[
+                        StyleSheet.absoluteFillObject,
+                        {borderRadius: 20, width: 300},
+                      ]}
                       initialRegion={{
                         latitude: 37.78825,
                         longitude: -122.4324,
@@ -502,11 +501,18 @@ export default class Create extends Component {
                   startDate={this.state.startDate}
                   startDayHandler={(date) => {
                     console.log('create: ' + date);
-                    this.setState({startDate: date});
+                    this.setState({
+                      startDate: combinedDates(date, this.state.startDate),
+                    });
                   }}
                   endDate={this.state.endDate}
                   endDayHandler={(date) => {
-                    this.setState({endDate: date});
+                    if (date === null) {
+                      date = subHours(this.state.startDate, -1);
+                    }
+                    this.setState({
+                      endDate: combinedDates(date, this.state.endDate),
+                    });
                   }}
                 />
                 <View
@@ -517,22 +523,25 @@ export default class Create extends Component {
                   <View style={styles.timePicker}>
                     <Text style={DefaultStyles.regularText}>Start Time</Text>
                     <DateTimePicker
-                      value={this.state.startTime}
+                      value={this.state.startDate}
                       mode="time"
                       onChange={(event, time) => {
-                        console.log(time);
-                        this.setState({startTime: time});
+                        this.setState({
+                          startDate: combinedDates(this.state.startDate, time),
+                        });
                       }}
                     />
                   </View>
                   <View style={styles.timePicker}>
                     <Text style={DefaultStyles.regularText}>End Time</Text>
                     <DateTimePicker
-                      value={this.state.endTime}
+                      value={this.state.endDate}
                       mode="time"
                       textColor="red"
                       onChange={(event, time) => {
-                        this.setState({endTime: time});
+                        this.setState({
+                          endDate: combinedDates(this.state.endDate, time),
+                        });
                       }}
                     />
                   </View>
@@ -544,11 +553,13 @@ export default class Create extends Component {
           <View>
             <TouchableHighlight
               style={{
-                backgroundColor: 'transparent',
+                backgroundColor: 'black',
                 margin: 15,
                 borderWidth: 1,
                 borderColor: 'gray',
                 borderRadius: 20,
+                width: 200,
+                height: 200,
               }}
               onPress={() => {
                 selectImageFile((source) => {
@@ -570,8 +581,9 @@ export default class Create extends Component {
                   source={{uri: this.state.resourcePath.uri}}
                   resizeMode="cover"
                   style={{
-                    height: Dimensions.get('window').width - 200,
-                    width: '70%',
+                    borderRadius: 20,
+                    height: '100%',
+                    width: '100%',
                   }}
                 />
               </View>

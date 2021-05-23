@@ -22,14 +22,18 @@ export default function App() {
   // };
   // Handle user state changes
   useEffect(() => {
-    const subscriber = auth().onAuthStateChanged((user) => setUser({user}));
+    const subscriber = auth().onAuthStateChanged((u) => {
+      console.log('Auth changed: ' + u?.uid);
+      setUser(u);
+    });
     return subscriber; // unsubscribe on unmount
-  });
-
-  if (!user) {
-    return <Signup />;
-  } else {
+  }, []);
+  if (user) {
+    console.log('Logged in as user: ' + user.uid);
     return <MasterTabView />;
+  } else {
+    console.log('SIGNUP');
+    return <Signup />;
   }
 }
 

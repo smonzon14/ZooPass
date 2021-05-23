@@ -3,7 +3,7 @@
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 
-const uid = auth().currentUser.uid;
+const uid = auth().currentUser?.uid;
 const friendsCollection = firestore()
   .collection('users')
   .doc(uid)
@@ -18,7 +18,7 @@ class Friends {
     }
     observer = friendsCollection.onSnapshot((collSnapshot) => {
       this.list.length = 0;
-      collSnapshot.docs.map((doc) => {
+      collSnapshot?.docs.map((doc) => {
         this.list.push({id: doc.id, ...doc.data()});
       });
 

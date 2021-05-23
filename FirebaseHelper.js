@@ -140,7 +140,7 @@ class FirebaseHelper {
       )
       .then(async () => {
         return await firestore()
-          .colection('users/' + authUser().uid + '/info')
+          .collection('users/' + authUser().uid + '/info')
           .doc('public')
           .set({bio: bio}, {merge: true});
       });

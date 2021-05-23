@@ -12,7 +12,7 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
 import functions from '@react-native-firebase/functions';
-console.log('SIGNUP');
+
 //import auth from 'firebase/auth';
 function capitalize(s) {
   if (typeof s !== 'string') {
@@ -116,8 +116,12 @@ function LoginUser(email, password) {
 
 export default class Signup extends React.Component {
   state = {email: '', password: '', first: '', last: '', signingUp: true};
-
+  constructor(props) {
+    super(props);
+    console.log('Hello');
+  }
   render() {
+    console.log('Wut');
     return (
       <View>
         <StatusBar barStyle="light-content" />
@@ -126,7 +130,7 @@ export default class Signup extends React.Component {
             <TextInput
               style={styles.inputText}
               placeholder="First Name"
-              placeholderTextColor="white"
+              placeholderTextColor="gray"
               onChangeText={(text) => this.setState({first: text})}
             />
           </View>
@@ -134,7 +138,7 @@ export default class Signup extends React.Component {
             <TextInput
               style={styles.inputText}
               placeholder="Last Name"
-              placeholderTextColor="white"
+              placeholderTextColor="gray"
               onChangeText={(text) => this.setState({last: text})}
             />
           </View>
@@ -142,8 +146,9 @@ export default class Signup extends React.Component {
             <TextInput
               style={styles.inputText}
               placeholder="Email"
-              placeholderTextColor="white"
+              placeholderTextColor="gray"
               onChangeText={(text) => this.setState({email: text})}
+              autoCorrect={false}
             />
           </View>
 
@@ -154,7 +159,7 @@ export default class Signup extends React.Component {
               secureTextEntry={true}
               textContentType={'oneTimeCode'}
               password={true}
-              placeholderTextColor="white"
+              placeholderTextColor="gray"
               onChangeText={(text) => this.setState({password: text})}
             />
           </View>
@@ -164,7 +169,7 @@ export default class Signup extends React.Component {
               placeholder="Re-Type Password"
               secureTextEntry={true}
               password={true}
-              placeholderTextColor="white"
+              placeholderTextColor="gray"
             />
           </View>
 
@@ -265,6 +270,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   inputText: {
+    fontSize: 18,
     height: 40,
     color: 'white',
     borderBottomColor: 'red',

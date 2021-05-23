@@ -94,7 +94,7 @@ export default class Profile extends Component {
             {this.state.profilePhotoURI && (
               <UserQR
                 style={styles.qrcode}
-                uid={auth().currentUser.uid}
+                uid={auth().currentUser?.uid}
                 logo={{uri: this.state.profilePhotoURI}}
               />
             )}
