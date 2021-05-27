@@ -8,7 +8,6 @@ export default class CustomHeader extends Component {
   render() {
     return (
       <SafeAreaView
-        statusBarProps={{barStyle: 'light-content'}}
         style={{
           width: '100%',
           backgroundColor:
@@ -19,7 +18,20 @@ export default class CustomHeader extends Component {
           marginTop: this.props.top == null ? 30 : this.props.top,
           flexDirection: 'row',
         }}>
-        <Text style={DefaultStyles.titleText}>{this.props.title}</Text>
+        <Text
+          style={[
+            DefaultStyles.titleText,
+            {
+              color: this.props.color
+                ? this.props.color
+                : DefaultStyles.titleText.color,
+              fontSize: this.props.fontSize
+                ? this.props.fontSize
+                : DefaultStyles.titleText.fontSize,
+            },
+          ]}>
+          {this.props.title}
+        </Text>
         {this.props.buttonComponent && (
           <View
             style={{

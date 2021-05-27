@@ -7,64 +7,86 @@ import {
   FlatList,
   RefreshControl,
   TouchableOpacity,
+  SectionList,
 } from 'react-native';
-import DefaultStyles from '../styles/Default.js';
-
+import DefaultStyles, {accentColors} from '../styles/Default.js';
+import {eventItem} from '../pageComponents/ListItems.js';
 import CustomHeader from '../pageComponents/CustomHeader.js';
-let InvitesList = [
-  {
-    title: 'hello world',
-    id: '123456',
-    desc: 'bring your own booze. Pizza will be here.',
-    numPpl: 0,
-    addr: '214 Lynn Fells Parkway, Melrose MA, 02176',
-    public: false,
-    entryFee: 0,
-    numComments: 0,
-    posted: '1/12/21, 11:11 PM',
-    startTime: '1/13/21, 9:00 PM',
-    endTime: '1/13/21, 11:59 PM',
-  },
-];
-
-const renderInvite = ({item}) => (
-  <Text style={{color: 'red'}}>Title: {item.title}</Text>
-);
-
+import GetLocation from 'react-native-get-location';
+import functions from '@react-native-firebase/functions';
+const findEventsInRange = functions().httpsCallable('findEventsInRange');
 export default class Invites extends Component {
-  state = {refreshing: false};
   constructor(props) {
     super(props);
-    this.modalRef = React.createRef();
+    this.state = {invites: [], nearbyPublicEvents: []};
+    //this.modalRef = React.createRef();
   }
-  onRefresh() {
-    this.setState({refreshing: true});
-    this.setState({refreshing: false});
+
+  componentDidMount() {
+    this.updateUserLocation().then(this.updateNearby);
   }
-  openAddFriendModal = () => {
-    this.modalRef.current?.open();
+
+  updateNearby = () => {
+    console.log('Updating nearbyInvites');
+    const center = [
+      this.state.userLocation.latitude,
+      this.state.userLocation.longitude,
+    ];
+    findEventsInRange({
+      center: center,
+      radiusInM: 1600,
+      categories: ['All'],
+    })
+      .then((res) => {
+        const nearbyPublicEvents = res.data;
+        nearbyPublicEvents.forEach((e, i) => {
+          ['posted', 'start', 'end'].forEach((key) => {
+            nearbyPublicEvents[i][key] = new Date(
+              nearbyPublicEvents[i][key]._seconds * 1000,
+            );
+          });
+        });
+        console.log('nearbyPublicEvents: ' + nearbyPublicEvents);
+        this.setState({nearbyPublicEvents});
+        //alert('found ' + nearbyPublicEvents.length + ' nearbyPublicEvents in your area.');
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
-  // retrieveInvites() {
-  //   this.setState({fetching: false});
-  // }
+  updateUserLocation = () => {
+    return GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 10000,
+    })
+      .then((location) => {
+        this.userIsLocated = true;
+        this.setState({
+          userLocation: {
+            latitude: location.latitude,
+            longitude: location.longitude,
+          },
+        });
+        return this.state.userLocation;
+      })
+      .catch((err) => {
+        return null;
+      });
+  };
   render() {
     return (
       <View style={DefaultStyles.container}>
-        <CustomHeader title="Invites" />
         <SafeAreaView>
-          <TouchableOpacity onPress={this.openAddFriendModal}>
-            <Text style={DefaultStyles.regularText}>Add Friends</Text>
-          </TouchableOpacity>
-          <FlatList
-            data={[{title: 'hello world', id: '123456'}]}
-            renderItem={renderInvite}
-            keyExtractor={(item) => item.id}
-            refreshControl={
-              <RefreshControl
-                refreshing={this.state.refreshing}
-                onRefresh={this.onRefresh.bind(this)}
-              />
-            }
+          <SectionList
+            sections={[
+              {title: 'Invites', data: this.state.invites},
+              {title: 'In the area.', data: this.state.nearbyPublicEvents},
+            ]}
+            keyExtractor={(e) => e.id}
+            renderItem={eventItem}
+            renderSectionHeader={({section: {title}}) => {
+              return <CustomHeader title={title} />;
+            }}
           />
         </SafeAreaView>
       </View>
@@ -72,4 +94,10 @@ export default class Invites extends Component {
   }
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  header: {
+    color: 'white',
+    padding: 15,
+    fontSize: 18,
+  },
+});

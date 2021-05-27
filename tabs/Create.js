@@ -13,9 +13,10 @@ import {
   Dimensions,
   FlatList,
   Animated,
+  Alert,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import DefaultStyles from '../styles/Default.js';
+import DefaultStyles, {accentColors} from '../styles/Default.js';
 import MapView, {PROVIDER_GOOGLE} from 'react-native-maps';
 import CustomMultiSelectCalendar from '../pageComponents/CustomMultiSelectCalendar.js';
 import CustomPromptModal from '../pageComponents/CustomPromptModal.js';
@@ -39,6 +40,7 @@ import {userItem} from '../pageComponents/ListItems.js';
 import Friends from '../data/Friends.js';
 import Geocoder from 'react-native-geocoding';
 import GetLocation from 'react-native-get-location';
+import CategoriesSelection from '../pageComponents/CategoriesSelection.js';
 
 Geocoder.init('AIzaSyBFXlfZ7jSlpu9VyV7u2deC7EwkjPQgS8I');
 let userLocation = null;
@@ -64,25 +66,39 @@ function nextDay() {
 }
 
 export default class Create extends Component {
-  state = {
-    title: '',
-    message: '',
-    startDate: new Date(),
-    endDate: nextDay(),
-    address: '',
-    isPublic: false,
-    isOnline: false,
-    editTimeSpan: false,
-    editAddress: false,
-    page: 0,
-    resourcePath: {},
-    friendsList: [],
-    invitedUsersList: [],
-    mapAnim: new Animated.Value(0),
-    addressSearches: [],
-    location: {longitude: -71.0589, latitude: 42.3601},
-    searchQuery: '',
-  };
+  constructor(props) {
+    super(props);
+
+    this.swiperRef = React.createRef(null);
+    this.baseState = {
+      startDate: new Date(),
+      endDate: nextDay(),
+      address: '',
+      isPublic: false,
+      isOnline: false,
+      editTimeSpan: false,
+      editAddress: false,
+      page: 0,
+      resourcePath: {},
+      friendsList: [],
+      guestList: [],
+      addressSearches: [],
+      searchQuery: '',
+    };
+    this.state = {
+      ...this.baseState,
+      location: {longitude: -71.0589, latitude: 42.3601},
+      mapAnim: new Animated.Value(0),
+    };
+    this.categories = ['All'];
+    this.title = '';
+    this.message = '';
+  }
+
+  resetState() {
+    this.setState(this.baseState);
+  }
+
   componentDidMount() {
     console.log('MOUNTED');
     GetLocation.getCurrentPosition({
@@ -176,21 +192,28 @@ export default class Create extends Component {
       return alert('Event needs an address.');
     }
     const event = {
-      title: this.state.title,
-      message: this.state.message,
+      title: this.title,
+      message: this.message,
       start: this.state.startDate,
       end: this.state.endDate,
       address: this.state.address,
-      latitude: this.state.location.latitude,
-      longitude: this.state.location.longitude,
-      isPublic: this.state.isPublic,
+      location: [this.state.location.latitude, this.state.location.longitude],
       isOnline: this.state.isOnline,
+      categories: this.categories,
+      guestList: this.state.isPublic ? undefined : this.state.guestList,
     };
-    return Fire.shareEvent(event, this.state.resourcePath.uri)
+    const uri = this.state.resourcePath.uri;
+    return (
+      this.state.isPublic
+        ? Fire.sharePublicEvent(event, uri)
+        : Fire.sharePrivateEvent(event, uri, event.guestList)
+    )
       .then((msg) => {
         console.log('SUCCESS: ' + msg);
         alert('Successfully Shared!');
+
         this.props.r.current.close();
+        this.resetState();
       })
       .catch((err) => {
         alert('Error Sharing Event... Please Try Again');
@@ -203,10 +226,6 @@ export default class Create extends Component {
       this.setState({friendsList: Friends.retrieveList()});
     }
   };
-  constructor(props) {
-    super(props);
-    this.swiperRef = React.createRef(null);
-  }
   // componentDidMount(){
   //   this.setState({friendsList: Friends.retrieveList()});
   // }
@@ -233,14 +252,16 @@ export default class Create extends Component {
           {this.state.page === 0 && (
             <TouchableOpacity
               style={[
-                DefaultStyles.openModalButton,
+                DefaultStyles.button,
                 {backgroundColor: 'white', alignSelf: 'flex-end'},
               ]}
               onPress={() => {
                 this.swiperRef.current.scrollBy(1);
                 this.setState({page: 1});
               }}>
-              <Text style={[DefaultStyles.boldText, {color: 'red'}]}>Next</Text>
+              <Text style={[DefaultStyles.boldText, {color: accentColors}]}>
+                Next
+              </Text>
             </TouchableOpacity>
           )}
           {this.state.page === 1 && (
@@ -248,7 +269,7 @@ export default class Create extends Component {
               style={{flexDirection: 'row', justifyContent: 'space-between'}}>
               <TouchableOpacity
                 style={[
-                  DefaultStyles.openModalButton,
+                  DefaultStyles.button,
                   {backgroundColor: 'transparent', padding: 0},
                 ]}
                 onPress={() => {
@@ -259,14 +280,14 @@ export default class Create extends Component {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
-                  DefaultStyles.openModalButton,
+                  DefaultStyles.button,
                   {backgroundColor: 'white', alignSelf: 'flex-end'},
                 ]}
                 onPress={() => {
                   this.swiperRef.current.scrollBy(1);
                   this.setState({page: 1});
                 }}>
-                <Text style={[DefaultStyles.boldText, {color: 'red'}]}>
+                <Text style={[DefaultStyles.boldText, {color: accentColors}]}>
                   Next
                 </Text>
               </TouchableOpacity>
@@ -277,7 +298,7 @@ export default class Create extends Component {
               style={{flexDirection: 'row', justifyContent: 'space-between'}}>
               <TouchableOpacity
                 style={[
-                  DefaultStyles.openModalButton,
+                  DefaultStyles.button,
                   {backgroundColor: 'transparent', padding: 0},
                 ]}
                 onPress={() => {
@@ -287,7 +308,7 @@ export default class Create extends Component {
                 <Text style={DefaultStyles.regularText}>Go Back</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={DefaultStyles.openModalButton}
+                style={DefaultStyles.button}
                 onPress={this.shareEvent}>
                 <Text style={DefaultStyles.boldText}>Share</Text>
               </TouchableOpacity>
@@ -310,7 +331,21 @@ export default class Create extends Component {
             buttonComponent={
               <TouchableOpacity
                 onPress={() => {
-                  this.props.r.current?.close();
+                  Alert.alert(
+                    'Delete Event',
+                    'Are you sure you want to delete your new event?',
+                    [
+                      {
+                        text: 'Delete',
+                        onPress: () => {
+                          this.props.r.current?.close();
+                          this.resetState();
+                        },
+                      },
+                      {text: 'Cancel', onPress: () => {}, style: 'cancel'},
+                    ],
+                    {cancelable: true},
+                  );
                 }}>
                 <Text style={DefaultStyles.cancelButton}>Cancel</Text>
               </TouchableOpacity>
@@ -321,9 +356,10 @@ export default class Create extends Component {
         <Swiper
           ref={this.swiperRef}
           showsButtons={false}
-          loadMinimal={true}
+          loadMinimal={false}
           showsPagination={true}
           index={0}
+          scrollEnabled={false}
           loop={false}
           onIndexChanged={this.pageChanged}>
           <View style={{height: '100%'}}>
@@ -333,13 +369,20 @@ export default class Create extends Component {
                 padding: 0,
               }}>
               <View>
+                <Text style={styles.textInputLabelText}>Categories</Text>
+                <CategoriesSelection
+                  all={false}
+                  onSelectCategory={(newCategories) =>
+                    (this.categories = newCategories)
+                  }
+                />
                 <Text style={styles.textInputLabelText}>Title</Text>
                 <TextInput
                   style={DefaultStyles.textInput}
                   placeholder="Title of the event"
                   placeholderTextColor="gray"
                   maxLength={50}
-                  onChangeText={(text) => this.setState({title: text})}
+                  onChangeText={(text) => (this.title = text)}
                 />
 
                 <Text style={styles.textInputLabelText}>When</Text>
@@ -596,7 +639,7 @@ export default class Create extends Component {
                 numberOfLines={4}
                 maxLength={300}
                 placeholderTextColor="gray"
-                onChangeText={(text) => this.setState({message: text})}
+                onChangeText={(text) => (this.message = text)}
               />
             </View>
           </View>

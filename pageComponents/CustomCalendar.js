@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {View, StyleSheet} from 'react-native';
 import {Calendar} from 'react-native-calendars';
-
+import {accentColors} from '../styles/Default.js';
 function formatDate(date) {
   var d = new Date(date),
     month = '' + (d.getMonth() + 1),
@@ -32,18 +32,18 @@ export default ({}) => {
         enableSwipeMonths={true}
         theme={{
           calendarBackground: 'transparent',
-          selectedDayBackgroundColor: 'red',
+          selectedDayBackgroundColor: accentColors.primaryDark,
           dayTextColor: 'white',
           monthTextColor: 'white',
-          arrowColor: 'red',
-          todayTextColor: 'red',
-          textDisabledColor: '#777777',
+          arrowColor: accentColors.primary,
+          todayTextColor: accentColors.primary,
+          textDisabledColor: '#002171',
         }}
         markedDates={{
           [day]: {
             selected: true,
             disableTouchEvent: true,
-            selectedColor: 'red',
+            selectedColor: accentColors.primaryLight,
             selectedTextColor: 'black',
           },
         }}
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
   },
   calendar: {
     width: '100%',
-    backgroundColor: '#404040',
+    backgroundColor: accentColors.secondaryDark,
     borderRadius: 20,
   },
   timesContainer: {

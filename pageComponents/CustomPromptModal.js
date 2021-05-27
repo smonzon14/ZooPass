@@ -12,7 +12,7 @@ import {
 
 import OptionList from '../pageComponents/OptionList.js';
 import Genders from '../enums/Genders.js';
-import DefaultStyles from '../styles/Default.js';
+import DefaultStyles, {accentColors} from '../styles/Default.js';
 export default (props) => {
   // const [visible, setVisible] = useState(false);
   // props.open(setVisible);
@@ -47,7 +47,7 @@ export default (props) => {
                   position: 'absolute',
                   right: 0,
                   top: 0,
-                  color: 'red',
+                  color: accentColors.primary,
                   textAlign: 'right',
                   textDecorationLine: 'underline',
                 }}>

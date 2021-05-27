@@ -14,24 +14,46 @@ const removeFriend = functions().httpsCallable('removeFriend');
 const getStatus = functions().httpsCallable('getFriendAndRequestStatus');
 class FirebaseHelper {
   //Create
-  static async shareEvent(event, image = null) {
-    const user = authUser();
-    return await usersCollection
-      .doc(user.uid)
-      .collection('events')
+  static sharePublicEvent(event, image = null) {
+    const uid = authUser()?.uid;
+    if (uid === undefined) {
+      return console.warn('uid not found. Could not share event');
+    }
+    event['owner'] = uid;
+    return firestore()
+      .collection('public_events')
       .add(event)
       .then(async (e) => {
-        console.log(e);
+        console.log('event added to public_events for ' + uid);
         if (image) {
-          const reference = storage().ref('events/' + user.uid + '/' + e.id);
+          const reference = storage().ref('events/' + uid + '/' + e.id);
           return await reference.putFile(image).then(async () => {
-            return usersCollection
-              .doc(user.uid)
-              .collection('events')
+            console.log('setting imageReference for event ' + e.id);
+            return firestore()
+              .collection('public_events')
               .doc(e.id)
-              .update({imageReference: await reference.getDownloadURL()});
+              .update({photoURL: await reference.getDownloadURL()});
           });
         }
+      });
+  }
+  static sharePrivateEvent(event, image, guestList) {
+    return console.warn('sharePrivateEvent not implemented');
+  }
+
+  static getHeatmap() {
+    return firestore()
+      .collection('public_events')
+      .get()
+      .then((querySnapshot) => {
+        const heatmapPoints = querySnapshot.docs.map((doc) =>
+          doc.get('location'),
+        );
+        return heatmapPoints;
+      })
+      .catch((err) => {
+        console.warn(err);
+        return [];
       });
   }
   static async updateUserProfileImage(resourcePath) {

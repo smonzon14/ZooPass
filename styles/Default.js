@@ -1,5 +1,16 @@
 import React, {Component} from 'react';
 import {StyleSheet} from 'react-native';
+
+const accentColors = {
+  primary: '#d81b60',
+  primaryLight: '#ff5c8d',
+  primaryDark: '#a00037',
+  secondary: '#1976d2',
+  secondaryLight: '#63a4ff',
+  secondaryDark: '#004ba0',
+};
+
+export {accentColors};
 export default StyleSheet.create({
   container: {
     backgroundColor: 'black',
@@ -8,7 +19,7 @@ export default StyleSheet.create({
   },
   cancelButton: {
     textDecorationLine: 'underline',
-    color: '#dd0000',
+    color: accentColors.primary,
     fontSize: 18,
     padding: 5,
   },
@@ -43,10 +54,10 @@ export default StyleSheet.create({
     backgroundColor: 'transparent',
     borderBottomWidth: 1,
   },
-  openModalButton: {
+  button: {
     margin: 15,
     marginBottom: 15,
-    backgroundColor: 'red',
+    backgroundColor: accentColors.secondary,
     color: 'white',
     borderRadius: 10,
     paddingLeft: 20,

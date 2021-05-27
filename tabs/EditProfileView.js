@@ -12,7 +12,7 @@ import CustomPromptModal from '../pageComponents/CustomPromptModal.js';
 import {Portal} from 'react-native-portalize';
 import DatePicker from 'react-native-date-picker';
 import OptionList from '../pageComponents/OptionList.js';
-import DefaultStyles from '../styles/Default.js';
+import DefaultStyles, {accentColors} from '../styles/Default.js';
 import {Modalize} from 'react-native-modalize';
 import CustomHeader from '../pageComponents/CustomHeader.js';
 import Fire from '../FirebaseHelper.js';
@@ -152,12 +152,13 @@ export default class EditProfileView extends React.Component {
           </TouchableOpacity>
 
           <TouchableOpacity
+            style={DefaultStyles.button}
             onPress={() => {
               if (this.saveUserInfo() !== null) {
                 this.onClose();
               }
             }}>
-            <Text style={DefaultStyles.headerText}>SAVE</Text>
+            <Text style={DefaultStyles.headerText}>Save and close</Text>
           </TouchableOpacity>
           <CustomPromptModal
             title="Gender"
@@ -194,7 +195,11 @@ export default class EditProfileView extends React.Component {
             />
           </CustomPromptModal>
           <TouchableOpacity
-            style={{backgroundColor: 'red', borderRadius: 5, padding: 10}}
+            style={{
+              backgroundColor: 'red',
+              borderRadius: 5,
+              padding: 10,
+            }}
             onPress={() => Fire.signOutUser()}>
             <Text style={DefaultStyles.boldText}>Sign Out</Text>
           </TouchableOpacity>

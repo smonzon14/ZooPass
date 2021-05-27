@@ -22,11 +22,68 @@ const userItem = ({item}, onPress) => {
     </TouchableOpacity>
   );
 };
+import {format, formatDistance, isSameDay} from 'date-fns';
 
-const eventItem = () => {};
+function formatPostedDate(date) {
+  return formatDistance(date, new Date(), {addSuffix: true});
+}
+
+function formatStartEndDate(startDate, endDate) {
+  if (isSameDay(startDate, endDate)) {
+    return (
+      format(startDate, 'eeee, MMMM dd · h:mm a - ') + format(endDate, 'h:mm a')
+    );
+  }
+  return (
+    format(startDate, 'eee, MMMM dd · h:mm a - ') +
+    format(endDate, 'eee, MMMM dd · h:mm a')
+  );
+}
+const eventItem = ({item}, onPress) => {
+  return (
+    <TouchableOpacity onPress={() => onPress(item)}>
+      <Text style={eventStyles.postedText}>
+        {formatPostedDate(item.posted)}
+      </Text>
+      <View style={eventStyles.eventBubble}>
+        <Text style={eventStyles.timeText}>
+          {formatStartEndDate(item.start, item.end)}
+        </Text>
+        <Text style={eventStyles.titleText}>{item.title}</Text>
+        <Text style={eventStyles.addressText}>{item.address}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 export {userItem, eventItem};
-
+const eventStyles = StyleSheet.create({
+  titleText: {
+    fontSize: 20,
+    color: 'white',
+  },
+  addressText: {
+    fontSize: 15,
+    color: 'gray',
+  },
+  timeText: {
+    fontSize: 15,
+    color: '#DDDD00',
+  },
+  postedText: {
+    fontSize: 13,
+    color: 'gray',
+    fontStyle: 'italic',
+    alignSelf: 'flex-end',
+  },
+  eventBubble: {
+    height: 100,
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: '#111',
+    justifyContent: 'space-around',
+  },
+});
 const styles = StyleSheet.create({
   userItemContainer: {
     flexDirection: 'row',

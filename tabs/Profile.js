@@ -8,22 +8,8 @@ import EditProfileView from '../tabs/EditProfileView.js';
 import UserQR from '../qrcode/UserQR.js';
 import CustomHeader from '../pageComponents/CustomHeader.js';
 import auth from '@react-native-firebase/auth';
-import {format, formatDistance, isSameDay} from 'date-fns';
-function formatPostedDate(date) {
-  return formatDistance(date, new Date(), {addSuffix: true});
-}
+import {eventItem} from '../pageComponents/ListItems.js';
 
-function formatStartEndDate(startDate, endDate) {
-  if (isSameDay(startDate, endDate)) {
-    return (
-      format(startDate, 'eeee, MMMM dd · h:mm a - ') + format(endDate, 'h:mm a')
-    );
-  }
-  return (
-    format(startDate, 'eee, MMMM dd · h:mm a - ') +
-    format(endDate, 'eee, MMMM dd · h:mm a')
-  );
-}
 export default class Profile extends Component {
   constructor(props) {
     super(props);
@@ -71,9 +57,9 @@ export default class Profile extends Component {
         {
           id: '12345678910',
           title: 'Hello World',
-          addr: '214 Lynn Fells Parkway Melrose MA',
-          startTime: new Date(),
-          endTime: new Date(),
+          address: '214 Lynn Fells Parkway Melrose MA',
+          start: new Date(),
+          end: new Date(),
           posted: new Date(),
         },
       ],
@@ -113,9 +99,6 @@ export default class Profile extends Component {
             </TouchableOpacity>
           </View>
         </View>
-        <Text style={styles.nameText}>
-          {this.state.first + ' ' + this.state.last}
-        </Text>
         <Text style={styles.bio}>{this.state.bio}</Text>
         <View style={styles.divider} />
       </View>
@@ -123,7 +106,8 @@ export default class Profile extends Component {
     return (
       <View style={styles.container}>
         <CustomHeader
-          title="Profile"
+          fontSize={22}
+          title={this.state.first + ' ' + this.state.last}
           buttonComponent={
             <TouchableOpacity onPress={() => this.openEditProfileModal()}>
               <Text style={styles.editButton}>Edit Profile</Text>
@@ -132,7 +116,7 @@ export default class Profile extends Component {
         />
         <FlatList
           ListHeaderComponent={userInfoView}
-          renderItem={renderEventItem}
+          renderItem={(item) => eventItem(item, () => {})}
           data={this.state.userEvents}
           keyExtractor={(item) => item.id}
         />
@@ -142,49 +126,7 @@ export default class Profile extends Component {
     );
   }
 }
-const eventStyles = StyleSheet.create({
-  titleText: {
-    fontSize: 20,
-    color: 'white',
-  },
-  addressText: {
-    fontSize: 15,
-    color: 'gray',
-  },
-  timeText: {
-    fontSize: 15,
-    color: '#DDDD00',
-  },
-  postedText: {
-    fontSize: 13,
-    color: 'gray',
-    fontStyle: 'italic',
-    alignSelf: 'flex-end',
-  },
-  eventBubble: {
-    height: 100,
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: '#111',
-    justifyContent: 'space-around',
-  },
-});
-const renderEventItem = ({item}) => {
-  return (
-    <View>
-      <Text style={eventStyles.postedText}>
-        {formatPostedDate(item.posted)}
-      </Text>
-      <View style={eventStyles.eventBubble}>
-        <Text style={eventStyles.timeText}>
-          {formatStartEndDate(item.startTime, item.endTime)}
-        </Text>
-        <Text style={eventStyles.titleText}>{item.title}</Text>
-        <Text style={eventStyles.addressText}>{item.addr}</Text>
-      </View>
-    </View>
-  );
-};
+
 const styles = StyleSheet.create({
   nameText: {
     padding: 5,
@@ -201,6 +143,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   qrcontainer: {
+    width: 200,
+    height: 200,
     padding: 5,
   },
   friendsButton: {

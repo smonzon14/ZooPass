@@ -1,13 +1,13 @@
 import React, {useState} from 'react';
 import {View, Text} from 'react-native';
 import {Picker} from '@react-native-community/picker';
-import DefaultStyles from '../styles/Default.js';
+import DefaultStyles, {accentColors} from '../styles/Default.js';
 export default (props) => {
   const [selected, setSelected] = useState(props.values[0]);
   return (
     <View
       style={{
-        backgroundColor: 'red',
+        backgroundColor: accentColors.primary,
         justifyContent: 'center',
         alignItems: 'center',
         height: 100,

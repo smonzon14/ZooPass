@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 
-import DefaultStyles from '../styles/Default.js';
+import DefaultStyles, {accentColors} from '../styles/Default.js';
 
 //props:
 //values : []
@@ -52,6 +52,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     alignSelf: 'center',
     borderWidth: 5,
-    borderColor: 'red',
+    borderColor: accentColors.primary,
   },
 });

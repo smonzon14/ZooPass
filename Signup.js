@@ -12,7 +12,7 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
 import functions from '@react-native-firebase/functions';
-
+import {accentColors} from '../styles/Default.js';
 //import auth from 'firebase/auth';
 function capitalize(s) {
   if (typeof s !== 'string') {
@@ -33,64 +33,6 @@ function CreateUser(email, password, first, last) {
       }
     },
   );
-  // first = capitalize(first);
-  // last = capitalize(last);
-  // auth()
-  //   .setPersistence('local')
-  //   .then(() => {
-  //     return auth()
-  //       .createUserWithEmailAndPassword(email, password)
-  //       .then((response) => {
-  //         const uid = response.user.uid;
-  //         const publicData = {
-  //           bday: null,
-  //           bio: '',
-  //           gender: 0,
-  //           numEvents: 0,
-  //           numFriends: 0,
-  //         }
-  //         const privateData = {
-  //           numRequests: 0,
-  //           userSince: new Date().toDateString(),
-  //         }
-  //         const data = {
-  //
-  //           first: first,
-  //           last: last,
-  //           photoUrl: undefined,
-  //         };
-  //         const usersRef = firestore().collection('users');
-  //         usersRef
-  //           .doc(uid)
-  //           .set(data)
-  //           .then(() => {
-  //             auth()
-  //               .currentUser.updateProfile({
-  //                 displayName: first + ' ' + last,
-  //               })
-  //               .then(() => {
-  //                 console.log('display name set successfully');
-  //               })
-  //               .catch((error) => {
-  //                 console.log('error setting display name: ' + error);
-  //               });
-  //             // auth()
-  //             //   .currentUser.sendEmailVerification()
-  //             //   .then(() => {
-  //             //     console.log('email sent');
-  //             //   })
-  //             //   .catch((error) => {
-  //             //     console.log(
-  //             //       'error while sending verification email: ' + error,
-  //             //     );
-  //             //   });
-  //             console.log('logged in.');
-  //           });
-  //       });
-  //   })
-  //   .catch((error) => {
-  //     alert(error);
-  //   });
 }
 function LoginUser(email, password) {
   auth()
@@ -118,10 +60,8 @@ export default class Signup extends React.Component {
   state = {email: '', password: '', first: '', last: '', signingUp: true};
   constructor(props) {
     super(props);
-    console.log('Hello');
   }
   render() {
-    console.log('Wut');
     return (
       <View>
         <StatusBar barStyle="light-content" />
@@ -222,7 +162,7 @@ const styles = StyleSheet.create({
   },
   signupBtn: {
     width: '80%',
-    backgroundColor: '#ff0000',
+    backgroundColor: accentColors.primary,
     borderRadius: 25,
     height: 50,
     alignItems: 'center',
@@ -242,7 +182,7 @@ const styles = StyleSheet.create({
   },
   loginBtn: {
     width: '80%',
-    backgroundColor: '#ff0000',
+    backgroundColor: accentColors.primary,
     borderRadius: 25,
     height: 50,
     alignItems: 'center',
@@ -273,7 +213,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     height: 40,
     color: 'white',
-    borderBottomColor: 'red',
+    borderBottomColor: accentColors.primary,
     borderBottomWidth: 2,
   },
   inputView: {

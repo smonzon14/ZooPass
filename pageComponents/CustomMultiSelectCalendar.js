@@ -2,6 +2,8 @@ import React, {useState} from 'react';
 import {View, StyleSheet} from 'react-native';
 import {Calendar} from 'react-native-calendars';
 import {subDays, format} from 'date-fns';
+import {accentColors} from '../styles/Default.js';
+
 function formatDate(date) {
   return date ? format(date, 'Y-MM-dd') : null;
 }
@@ -44,30 +46,30 @@ export default (props) => {
         enableSwipeMonths={true}
         theme={{
           calendarBackground: 'transparent',
-          selectedDayBackgroundColor: 'red',
+          selectedDayBackgroundColor: accentColors.primary,
           dayTextColor: 'white',
           monthTextColor: 'white',
-          arrowColor: 'red',
-          todayTextColor: 'red',
+          arrowColor: accentColors.primary,
+          todayTextColor: accentColors.primary,
           textDisabledColor: '#777777',
         }}
         markedDates={{
           [formatDate(day)]: {
             selected: true,
             disableTouchEvent: false,
-            selectedColor: 'red',
+            selectedColor: accentColors.primary,
             startingDay: true,
             endingDay: dayLast === null,
             selectedTextColor: 'black',
-            color: 'red',
+            color: accentColors.primary,
           },
           [formatDate(dayLast)]: {
             selected: true,
             disableTouchEvent: false,
-            selectedColor: 'red',
+            selectedColor: accentColors.primary,
             endingDay: true,
             selectedTextColor: 'black',
-            color: 'red',
+            color: accentColors.primary,
           },
         }}
         markingType={'period'}
