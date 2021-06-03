@@ -2,6 +2,9 @@
 
 import React, {useState} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
+import {faBookmark, faShareSquare} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {accentColors} from '../styles/Default.js';
 
 const userItem = ({item}, onPress) => {
   return (
@@ -35,22 +38,78 @@ function formatStartEndDate(startDate, endDate) {
     );
   }
   return (
-    format(startDate, 'eee, MMMM dd · h:mm a - ') +
-    format(endDate, 'eee, MMMM dd · h:mm a')
+    format(startDate, 'eee, MMMM dd - ') + format(endDate, 'eee, MMMM dd')
+    // format(startDate, 'eee, MMMM dd · h:mm a - ') +
+    // format(endDate, 'eee, MMMM dd · h:mm a')
   );
 }
 const eventItem = ({item}, onPress) => {
   return (
     <TouchableOpacity onPress={() => onPress(item)}>
-      <Text style={eventStyles.postedText}>
-        {formatPostedDate(item.posted)}
-      </Text>
-      <View style={eventStyles.eventBubble}>
-        <Text style={eventStyles.timeText}>
-          {formatStartEndDate(item.start, item.end)}
+      <View>
+        <Text style={eventStyles.postedText}>
+          {'posted ' + formatPostedDate(item.posted)}
         </Text>
-        <Text style={eventStyles.titleText}>{item.title}</Text>
-        <Text style={eventStyles.addressText}>{item.address}</Text>
+        <View style={eventStyles.eventBubble}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'flex-start',
+            }}>
+            <Image
+              style={{
+                marginRight: 10,
+                borderRadius: 10,
+                width: 100,
+                height: 100,
+              }}
+              resizeMode="cover"
+              source={{uri: item.photoURL}}
+            />
+            <View
+              style={{
+                width: 300,
+                justifyContent: 'space-between',
+                flex: 1,
+                flexDirection: 'column',
+              }}>
+              <Text style={eventStyles.timeText}>
+                {formatStartEndDate(item.start, item.end)}
+              </Text>
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={eventStyles.titleText}>
+                {item.title}
+              </Text>
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={eventStyles.addressText}>
+                {item.address}
+              </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                }}>
+                <FontAwesomeIcon
+                  style={{margin: 5}}
+                  icon={faShareSquare}
+                  size={18}
+                  color="white"
+                />
+                <FontAwesomeIcon
+                  style={{margin: 5}}
+                  icon={faBookmark}
+                  size={18}
+                  color="white"
+                />
+              </View>
+            </View>
+          </View>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -59,28 +118,27 @@ const eventItem = ({item}, onPress) => {
 export {userItem, eventItem};
 const eventStyles = StyleSheet.create({
   titleText: {
-    fontSize: 20,
+    fontSize: 18,
     color: 'white',
   },
   addressText: {
-    fontSize: 15,
+    fontSize: 12,
     color: 'gray',
   },
   timeText: {
-    fontSize: 15,
-    color: '#DDDD00',
+    fontSize: 14,
+    color: accentColors.secondaryLight,
   },
   postedText: {
-    fontSize: 13,
+    fontSize: 11,
+    padding: 5,
     color: 'gray',
     fontStyle: 'italic',
-    alignSelf: 'flex-end',
   },
   eventBubble: {
-    height: 100,
     padding: 10,
-    borderRadius: 10,
-    backgroundColor: '#111',
+    borderRadius: 20,
+    backgroundColor: 'black',
     justifyContent: 'space-around',
   },
 });

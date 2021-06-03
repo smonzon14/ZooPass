@@ -1,13 +1,31 @@
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, Alert} from 'react-native';
 import React, {useState, useEffect} from 'react';
 import auth from '@react-native-firebase/auth';
 import Signup from './Signup.js';
 import MasterTabView from './tabs/MasterTabView.js';
 import Geocoder from 'react-native-geocoding';
+import messaging from '@react-native-firebase/messaging';
+import firestore from '@react-native-firebase/firestore';
+
+async function requestUserNotificationPermission() {
+  const authStatus = await messaging().requestPermission();
+  const enabled =
+    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+  return enabled;
+}
+
+async function saveTokenToFirestore(token, uid) {
+  return await firestore()
+    .collection('tokens')
+    .doc(uid)
+    .update({tokens: firestore.FieldValue.arrayUnion(token)});
+}
 
 export default function App() {
   // Set an initializing state whilst Firebase connects
   const [user, setUser] = useState(null);
+  const [subscribersFCM, setSubscribersFCM] = useState([]);
   // this.options = {
   //   topBar: {
   //     visibility: 'none',
@@ -21,13 +39,45 @@ export default function App() {
   //   },
   // };
   // Handle user state changes
+  async function checkUserNotificationPermission() {
+    const enabled = await requestUserNotificationPermission();
+    if (enabled) {
+      console.log('notifications enabled; subscribing listeners');
+      const messagingUnsubscribe = messaging().onMessage(
+        async (remoteMessage) => {
+          Alert.alert('In App Notification:', JSON.stringify(remoteMessage));
+        },
+      );
+      const tokenUnsubscribe = messaging().onTokenRefresh(async (token) => {
+        console.log('token: ' + token);
+        return await saveTokenToFirestore(token, user.uid);
+      });
+      setSubscribersFCM([messagingUnsubscribe, tokenUnsubscribe]);
+      messaging()
+        .getToken()
+        .then((token) => {
+          console.log(token);
+        });
+    }
+    return enabled;
+  }
+
   useEffect(() => {
-    const subscriber = auth().onAuthStateChanged((u) => {
-      console.log('Auth changed: ' + u?.uid);
+    const authUnsubscribe = auth().onAuthStateChanged((u) => {
       setUser(u);
+      if (u) {
+        checkUserNotificationPermission();
+      } else {
+        subscribersFCM.forEach((s, i) => {
+          console.log('Unsubscribing messaging listener ' + i);
+          s();
+        });
+        messaging().deleteToken();
+      }
     });
-    return subscriber; // unsubscribe on unmount
+    return authUnsubscribe;
   }, []);
+
   if (user) {
     console.log('Logged in as user: ' + user.uid);
     return <MasterTabView />;

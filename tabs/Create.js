@@ -100,7 +100,6 @@ export default class Create extends Component {
   }
 
   componentDidMount() {
-    console.log('MOUNTED');
     GetLocation.getCurrentPosition({
       enableHighAccuracy: true,
       timeout: 10000,
@@ -127,6 +126,7 @@ export default class Create extends Component {
         };
       })
       .catch((err) => {
+        console.log('get current position error:');
         console.log(err);
       });
   }
@@ -191,7 +191,7 @@ export default class Create extends Component {
     if (this.state.address === '') {
       return alert('Event needs an address.');
     }
-    const event = {
+    let event = {
       title: this.title,
       message: this.message,
       start: this.state.startDate,
@@ -200,13 +200,16 @@ export default class Create extends Component {
       location: [this.state.location.latitude, this.state.location.longitude],
       isOnline: this.state.isOnline,
       categories: this.categories,
-      guestList: this.state.isPublic ? undefined : this.state.guestList,
     };
+    if (!this.state.isPublic) {
+      event['guestList'] = this.state.guestList;
+    }
     const uri = this.state.resourcePath.uri;
-    return (
-      this.state.isPublic
-        ? Fire.sharePublicEvent(event, uri)
-        : Fire.sharePrivateEvent(event, uri, event.guestList)
+    return Fire.shareEvent(
+      event,
+      this.state.isPublic,
+      uri,
+      this.state.guestList,
     )
       .then((msg) => {
         console.log('SUCCESS: ' + msg);
@@ -216,7 +219,7 @@ export default class Create extends Component {
         this.resetState();
       })
       .catch((err) => {
-        alert('Error Sharing Event... Please Try Again');
+        alert(err);
         console.log('error sharing event: ' + err);
       });
   };

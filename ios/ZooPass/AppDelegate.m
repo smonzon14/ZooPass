@@ -15,6 +15,8 @@
 #import <SKIOSNetworkPlugin/SKIOSNetworkAdapter.h>
 #import <FlipperKitReactPlugin/FlipperKitReactPlugin.h>
 
+#import "RNFBMessagingModule.h"
+
 static void InitializeFlipper(UIApplication *application) {
   FlipperClient *client = [FlipperClient sharedClient];
   SKDescriptorMapper *layoutDescriptorMapper = [[SKDescriptorMapper alloc] initWithDefaults];
@@ -30,21 +32,24 @@ static void InitializeFlipper(UIApplication *application) {
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    //Google Maps Service
-    [GMSServices provideAPIKey:@"AIzaSyAfzxGPri6oVkm_IMgtGrA38jXWOST3DXc"];
-    //Firebase Service
-    [FIRApp configure];
-    //    if ([FIRApp defaultApp] == nil) {
-    //      [FIRApp configure];
-    //    }
+  //Google Maps Service
+  [GMSServices provideAPIKey:@"AIzaSyAfzxGPri6oVkm_IMgtGrA38jXWOST3DXc"];
+  //Firebase Service
+  [FIRApp configure];
+  //    if ([FIRApp defaultApp] == nil) {
+  //      [FIRApp configure];
+  //    }
+  
+  
 #ifdef FB_SONARKIT_ENABLED
   InitializeFlipper(application);
 #endif
-
+  
+  NSDictionary *appProperties = [RNFBMessagingModule addCustomPropsToUserProps:nil withLaunchOptions:launchOptions];
   RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
   RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
                                                    moduleName:@"ZooPass"
-                                            initialProperties:nil];
+                                            initialProperties:appProperties];
 
   rootView.backgroundColor = [[UIColor alloc] initWithRed:1.0f green:1.0f blue:1.0f alpha:1];
 

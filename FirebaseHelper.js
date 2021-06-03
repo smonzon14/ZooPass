@@ -14,14 +14,26 @@ const removeFriend = functions().httpsCallable('removeFriend');
 const getStatus = functions().httpsCallable('getFriendAndRequestStatus');
 class FirebaseHelper {
   //Create
-  static sharePublicEvent(event, image = null) {
+  static createEvent(event, isPublic, image = null) {
+    const requiredFields = ['title', 'start', 'end'];
+    if (!requiredFields.reduce((acc, e) => event[e] && acc, true)) {
+      throw 'missing a title or time frame';
+    }
+    if (!isPublic && (!event.guestList || !event.guestList?.length)) {
+      throw 'guest list needs recipients if event is private';
+    }
+    if (!event.isOnline && !address) {
+      throw 'non-virtual events must have an address';
+    }
     const uid = authUser()?.uid;
     if (uid === undefined) {
-      return console.warn('uid not found. Could not share event');
+      throw 'unidentified user. Could not share event';
     }
     event['owner'] = uid;
+    const collectionName = isPublic ? 'public_events' : 'private_events';
+
     return firestore()
-      .collection('public_events')
+      .collection(collectionName)
       .add(event)
       .then(async (e) => {
         console.log('event added to public_events for ' + uid);
@@ -30,15 +42,12 @@ class FirebaseHelper {
           return await reference.putFile(image).then(async () => {
             console.log('setting imageReference for event ' + e.id);
             return firestore()
-              .collection('public_events')
+              .collection(collectionName)
               .doc(e.id)
               .update({photoURL: await reference.getDownloadURL()});
           });
         }
       });
-  }
-  static sharePrivateEvent(event, image, guestList) {
-    return console.warn('sharePrivateEvent not implemented');
   }
 
   static getHeatmap() {
@@ -184,6 +193,7 @@ class FirebaseHelper {
       return res.data;
     });
   }
+
   static signOutUser() {
     return auth()
       .signOut()

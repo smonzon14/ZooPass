@@ -22,8 +22,9 @@ function capitalize(s) {
 }
 function CreateUser(email, password, first, last) {
   const registerUserWithEmailAndPassword = functions().httpsCallable(
-    'registerUserWithEmailAndPassword',
+    'registerUserWithEmail',
   );
+
   return registerUserWithEmailAndPassword({email, password, first, last}).then(
     (res) => {
       const {success, message, uid} = res.data;
@@ -43,13 +44,13 @@ function LoginUser(email, password) {
         id: uid,
         email,
       };
-      const usersRef = firestore().collection('users');
-      usersRef
-        .doc(uid)
-        .get()
-        .then((doc) => {
-          console.log('Got user data: ' + doc.data());
-        });
+      // const usersRef = firestore().collection('users');
+      // usersRef
+      //   .doc(uid)
+      //   .get()
+      //   .then((doc) => {
+      //     console.log('Got user data: ' + doc.data());
+      //   });
     })
     .catch((error) => {
       alert(error);

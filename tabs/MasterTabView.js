@@ -17,6 +17,7 @@ import {
   faUser,
   faCircle,
 } from '@fortawesome/free-solid-svg-icons';
+
 export default class MasterTabView extends Component {
   constructor(props) {
     super(props);

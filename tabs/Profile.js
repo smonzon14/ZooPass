@@ -9,6 +9,12 @@ import UserQR from '../qrcode/UserQR.js';
 import CustomHeader from '../pageComponents/CustomHeader.js';
 import auth from '@react-native-firebase/auth';
 import {eventItem} from '../pageComponents/ListItems.js';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {accentColors} from '../styles/Default.js';
+import {
+  faUserFriends,
+  faCalendarCheck,
+} from '@fortawesome/free-solid-svg-icons';
 
 export default class Profile extends Component {
   constructor(props) {
@@ -24,7 +30,7 @@ export default class Profile extends Component {
       birthday: new Date(),
       editGender: false,
       editBDay: false,
-      profilePhotoResourcePath: {uri: ''},
+      profilePhotoURI: '',
     };
   }
   componentDidMount() {
@@ -75,34 +81,49 @@ export default class Profile extends Component {
   render() {
     const userInfoView = (
       <View>
-        <View style={{flexDirection: 'row'}}>
+        <View style={{alignItems: 'center', padding: 20}}>
           <View style={styles.qrcontainer}>
-            {this.state.profilePhotoURI && (
-              <UserQR
-                style={styles.qrcode}
-                uid={auth().currentUser?.uid}
-                logo={{uri: this.state.profilePhotoURI}}
-              />
-            )}
-          </View>
-          <View
-            style={{
-              alignItems: 'center',
-              flex: 1,
-              justifyContent: 'space-around',
-            }}>
-            <TouchableOpacity onPress={() => this.openFriendsModal()}>
-              <Text style={styles.friendsButton}>Friends</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => this.openFriendsModal()}>
-              <Text style={styles.friendsButton}>Events</Text>
-            </TouchableOpacity>
+            <UserQR
+              style={styles.qrcode}
+              uid={auth().currentUser?.uid}
+              logo={{uri: this.state.profilePhotoURI}}
+            />
           </View>
         </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            flex: 1,
+            justifyContent: 'center',
+          }}>
+          <TouchableOpacity
+            style={styles.friendsButton}
+            onPress={() => this.openFriendsModal()}>
+            <Text style={styles.counterText}>{0}</Text>
+            <Text style={styles.friendsButtonText}>Friends</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.friendsButton}
+            onPress={() => this.openFriendsModal()}>
+            <Text style={styles.counterText}>{1}</Text>
+            <Text style={styles.friendsButtonText}>Events</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.friendsButton}
+            onPress={() => this.openFriendsModal()}>
+            <Text style={styles.counterText}>{1}</Text>
+            <Text style={styles.friendsButtonText}>Saved</Text>
+          </TouchableOpacity>
+        </View>
+
         <Text style={styles.bio}>{this.state.bio}</Text>
         <View style={styles.divider} />
       </View>
     );
+    // <FontAwesomeIcon icon={faCalendarCheck} size={23} color="white" />
+    //<FontAwesomeIcon icon={faUserFriends} size={23} color="white" />
+
     return (
       <View style={styles.container}>
         <CustomHeader
@@ -148,10 +169,13 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   friendsButton: {
-    borderRadius: 5,
-    borderColor: 'gray',
-    color: 'white',
-    fontSize: 20,
+    marginLeft: 20,
+    marginRight: 20,
+    alignItems: 'center',
+  },
+  friendsButtonText: {
+    color: 'gray',
+    fontSize: 12,
   },
   editButton: {
     color: 'white',
@@ -162,10 +186,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
     padding: 5,
   },
+  counterText: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    color: 'white',
+  },
   bio: {
+    marginTop: 10,
     fontSize: 15,
-    padding: 5,
-    color: 'gray',
+    padding: 10,
+    color: 'white',
+    textAlign: 'center',
   },
   divider: {
     borderBottomWidth: 1,

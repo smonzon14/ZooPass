@@ -12,7 +12,11 @@ export default class UserQR extends Component {
       logo: props.logo,
     };
   }
+  static getDerivedStateFromProps(nextProps, prevState) {
+    return nextProps;
+  }
   render() {
+    console.log(this.state.logo);
     return (
       <QRCode
         value={this.state.uid}
